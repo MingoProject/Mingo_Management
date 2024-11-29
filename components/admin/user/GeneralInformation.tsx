@@ -31,7 +31,7 @@ const GeneralInformation = ({ item }: { item: User }) => {
         }}
       >
         <Image
-          src="/assets/images/background.jpg"
+          src="https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg"
           alt="background"
           layout="fill" // Lấp đầy khung
           objectFit="cover" // Cắt ảnh để phù hợp với khung
@@ -48,7 +48,7 @@ const GeneralInformation = ({ item }: { item: User }) => {
           }}
         >
           <Image
-            src="/assets/images/background.jpg"
+            src="https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg"
             alt="background"
             layout="fill" // Lấp đầy khung
             objectFit="cover" // Cắt ảnh để phù hợp với khung

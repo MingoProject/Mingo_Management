@@ -329,22 +329,70 @@ export const posts: Post[] = [
     privacy: "public",
 
     attachment: [
-      { id: 1, src: "/assets/images/background.jpg" },
-      { id: 2, src: "/assets/images/background.jpg" },
-      { id: 3, src: "/assets/images/background.jpg" },
-      { id: 4, src: "/assets/images/background.jpg" },
-      { id: 5, src: "/assets/images/background.jpg" },
-      { id: 6, src: "/assets/images/background.jpg" },
-      { id: 7, src: "/assets/images/background.jpg" },
-      { id: 8, src: "/assets/images/background.jpg" },
-      { id: 9, src: "/assets/images/background.jpg" },
-      { id: 10, src: "/assets/images/background.jpg" },
-      { id: 11, src: "/assets/images/background.jpg" },
-      { id: 12, src: "/assets/images/background.jpg" },
-      { id: 13, src: "/assets/images/background.jpg" },
-      { id: 14, src: "/assets/images/background.jpg" },
-      { id: 15, src: "/assets/images/background.jpg" },
-      { id: 16, src: "/assets/images/background.jpg" },
+      {
+        id: 1,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 2,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 3,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 4,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 5,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 6,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 7,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 8,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 9,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 10,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 11,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 12,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 13,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 14,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 15,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+      {
+        id: 16,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
     ],
     like: 120,
     share: 15,
@@ -378,7 +426,12 @@ export const posts: Post[] = [
     hashtag: ["#marathon", "#fitness", "#achievement"],
     tag: ["@runningclub"],
     privacy: "public",
-    attachment: [{ id: 1, src: "/assets/images/background.jpg" }],
+    attachment: [
+      {
+        id: 1,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+    ],
     like: 200,
     share: 30,
     reaction: [
@@ -404,7 +457,12 @@ export const posts: Post[] = [
     hashtag: ["#art", "#painting", "#hobby"],
     tag: [],
     privacy: "public",
-    attachment: [{ id: 1, src: "/assets/images/background.jpg" }],
+    attachment: [
+      {
+        id: 1,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+    ],
     like: 300,
     share: 45,
     reaction: [
@@ -430,7 +488,12 @@ export const posts: Post[] = [
     hashtag: ["#travel", "#japan", "#adventure"],
     tag: ["@travelbuddy"],
     privacy: "public",
-    attachment: [{ id: 1, src: "/assets/images/background.jpg" }],
+    attachment: [
+      {
+        id: 1,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+    ],
     like: 400,
     share: 100,
     reaction: [
@@ -462,7 +525,12 @@ export const posts: Post[] = [
     hashtag: ["#cooking", "#recipe", "#foodie"],
     tag: [],
     privacy: "public",
-    attachment: [{ id: 1, src: "/assets/images/background.jpg" }],
+    attachment: [
+      {
+        id: 1,
+        src: "https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg",
+      },
+    ],
     like: 150,
     share: 20,
     reaction: [

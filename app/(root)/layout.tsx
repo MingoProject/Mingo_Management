@@ -1,13 +1,17 @@
-import Navbar from "@/components/shared/navbar/Navbar";
+"use client";
+import Sidebar from "@/components/shared/sidebar/Sidebar";
 import React from "react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <main className="background-light800_dark400 relative">
-      <Navbar />
-      <div className=" flex">
-        <section className=" flex flex-1 flex-col">
-          <div className=" mx-auto w-full ">{children}</div>
+    <main className="background-light700_dark400 flex w-full cursor-default">
+      <div className=" bg-white">
+        <Sidebar />
+      </div>
+
+      <div className={`background-light700_dark400 ml-64 w-[84%]`}>
+        <section className="h-screen w-full ">
+          <div className="background-light700_dark400">{children}</div>
         </section>
       </div>
     </main>

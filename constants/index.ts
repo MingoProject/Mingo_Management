@@ -32,7 +32,7 @@ export const navbarLinks: NavbarLink[] = [
 export const sidebarLinks: SidebarLink[] = [
   {
     icon: "majesticons:home-line",
-    route: "/dashboard",
+    route: "/",
     label: "Dashboard",
   },
   {
