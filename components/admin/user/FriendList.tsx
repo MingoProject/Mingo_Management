@@ -3,59 +3,59 @@ import TableSearch from "@/components/shared/TableSearch";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { userData } from "@/components/shared/data";
+// import { userData } from "@/components/shared/data";
 import Active from "@/components/cards/Active";
 import Off from "@/components/cards/Off";
 import Table from "@/components/shared/Table";
 
 type User = {
-  id: number;
+  id: string;
   fullname: string;
-  gender: string;
-  address: string;
-  nickName: string;
-  gmail: string;
+  email: string;
   phone: string;
-  status: number; // Trạng thái người dùng (ví dụ: 'active', 'inactive')
-  job: string; // Nghề nghiệp
-  bio: string; // Giới thiệu về bản thân
-  hobbies: string[]; // Sở thích (danh sách)
-  enrolled: Date; // Ngày tham gia (đăng ký)
+  status: boolean;
+  enrolled: Date;
+  birthday: Date;
 };
 
-type FriendType = "all" | "bestFriend" | "follower" | "block" | "following";
+type FriendType = "all" | "bestFriend" | "block" | "following";
 
 const columns = [
   {
-    header: "Username",
-    accessor: "fullname",
-    className: " text-lg font-md",
-  },
-  {
     header: "Fullname",
     accessor: "fullname",
-    className: "hidden md:table-cell text-lg font-md",
-  },
-  {
-    header: "Created Date",
-    accessor: "createdDate",
     className: " text-lg font-md",
   },
   {
     header: "Email",
-    accessor: "gmail",
+    accessor: "email",
+    className: "hidden md:table-cell text-lg font-md",
+  },
+  {
+    header: "Phone Number",
+    accessor: "phone",
+    className: " text-lg font-md",
+  },
+  {
+    header: "Attend Date",
+    accessor: "enrolled",
     className: "hidden lg:table-cell text-lg font-md",
   },
   {
-    header: "Phone",
-    accessor: "phone",
+    header: "Birthday",
+    accessor: "birthday",
     className: "hidden lg:table-cell text-lg font-md",
   },
 
   { header: "Status", accessor: "status", className: " text-lg font-md" },
 ];
 
-const FriendList = () => {
+const FriendList = ({
+  friendsData,
+  bestfriendsData,
+  blocksData,
+  followingsData,
+}: any) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("");
   const [activeTab, setActiveTab] = useState<FriendType>("all");
@@ -70,7 +70,7 @@ const FriendList = () => {
   });
   type SortableKeys = "username" | "id" | "fullname" | "email" | "phone";
 
-  const getValueByKey = (item: (typeof userData)[0], key: SortableKeys) => {
+  const getValueByKey = (item: (typeof friendsData)[0], key: SortableKeys) => {
     switch (key) {
       case "username":
         return item.fullname;
@@ -86,7 +86,49 @@ const FriendList = () => {
         return "";
     }
   };
-  const sorted = [...userData].sort((a, b) => {
+
+  const getFilteredData = () => {
+    switch (activeTab) {
+      case "bestFriend":
+        return bestfriendsData;
+      case "block":
+        return blocksData;
+      case "following":
+        return followingsData;
+      default:
+        return friendsData;
+    }
+  };
+
+  const requestSort = (key: SortableKeys) => {
+    let direction: "ascending" | "descending" = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const filterData = getFilteredData().filter((item: any) => {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+
+    const matchesSearch =
+      item.fullname.toLowerCase().includes(lowerCaseQuery) ||
+      item.email.toLowerCase().includes(lowerCaseQuery) ||
+      item.phone.toLowerCase().includes(lowerCaseQuery) ||
+      format(item.enrolled, "dd/MM/yyyy")
+        .toLowerCase()
+        .includes(lowerCaseQuery);
+
+    const matchesFilter =
+      (filterOption === "offline" && !item.status) ||
+      (filterOption === "online" && item.status) ||
+      !filterOption;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // Kết hợp lọc với sắp xếp
+  const sorted = [...filterData].sort((a, b) => {
     const aValue = getValueByKey(a, sortConfig.key);
     const bValue = getValueByKey(b, sortConfig.key);
 
@@ -97,33 +139,6 @@ const FriendList = () => {
       return sortConfig.direction === "ascending" ? 1 : -1;
     }
     return 0;
-  });
-  const requestSort = (key: SortableKeys) => {
-    let direction: "ascending" | "descending" = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const filterData = sorted.filter((item) => {
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    // Lọc theo searchQuery
-    const matchesSearch =
-      item.fullname.toLowerCase().includes(lowerCaseQuery) ||
-      item.gmail.toLowerCase().includes(lowerCaseQuery) ||
-      item.phone.toLowerCase().includes(lowerCaseQuery) ||
-      format(item.enrolled, "dd/MM/yyyy")
-        .toLowerCase()
-        .includes(lowerCaseQuery);
-
-    // Lọc theo giá trị bộ lọc được chọn
-    const matchesFilter =
-      (filterOption === "offline" && item.status === 0) ||
-      (filterOption === "online" && item.status === 1) ||
-      !filterOption; // Không có bộ lọc nào được chọn thì hiển thị tất cả
-
-    return matchesSearch && matchesFilter;
   });
 
   useEffect(() => {
@@ -136,16 +151,19 @@ const FriendList = () => {
 
   const renderRow = (item: User) => (
     <tr key={item.id} className=" my-4 border-t border-gray-300  text-sm ">
-      <td className="px-4 py-2" key={item.id}>
-        <Link href={`/post/${item.id}`}>
+      <td className="px-4 py-2">
+        <Link href={`/user/${item.id}`}>
           <h3>{item.fullname}</h3>
-          <p className="text-xs text-gray-500">#00{item.id}</p>
+          <p className="text-xs text-gray-500">#{item.id}</p>
         </Link>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm ">{item.fullname}</p>
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <p className="text-sm ">{item.email}</p>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <p className="text-sm ">{item.phone}</p>
+      </td>
+      <td className="hidden px-4 py-2 lg:table-cell">
         <p className="text-sm ">
           <div className="flex w-full flex-col ">
             <p>{format(item.enrolled, "PPP")}</p>
@@ -159,15 +177,25 @@ const FriendList = () => {
           </div>
         </p>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm ">{item.gmail}</p>
+
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <p className="text-sm ">
+          <div className="flex w-full flex-col ">
+            <p>{format(item.birthday, "PPP")}</p>
+            <p className="pt-1 text-xs text-gray-500">
+              {new Date(item.birthday).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </p>
+          </div>
+        </p>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm ">{item.phone}</p>
-      </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
+
+      <td className="hidden px-4 py-2 lg:table-cell">
         <p className="text-sm text-gray-500">
-          {item.status === 0 ? <Off /> : <Active />}
+          {item.status === false ? <Off /> : <Active />}
         </p>
       </td>
     </tr>
@@ -201,19 +229,19 @@ const FriendList = () => {
         >
           Blocked
         </button>
-        <button
+        {/* <button
           className={`flex items-center gap-1 ${activeTab === "follower" ? "text-primary-100 opacity-100" : "opacity-40"}`}
           onClick={() => setActiveTab("follower")}
         >
           Followers
-        </button>
+        </button> */}
       </div>
 
       <div className="w-full px-4">
         <Table
           columns={columns}
           renderRow={renderRow}
-          data={filterData} // Pass sorted data to the table
+          data={sorted} // Pass sorted data to the table
           onSort={(key: string) => requestSort(key as SortableKeys)} // Sorting function
         />
       </div>

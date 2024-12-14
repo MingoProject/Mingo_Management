@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Headers from "@/components/header/HeaderNoButton";
 import TableSearch from "@/components/shared/TableSearch";
-import { userData } from "@/components/shared/data";
+// import { userData } from "@/components/shared/data";
 import Active from "@/components/cards/Active";
 import Off from "@/components/cards/Off";
 import { format } from "date-fns";
@@ -19,42 +19,51 @@ import {
 import PaginationUI from "@/components/shared/Pagination";
 import { PaginationProps } from "@/types/pagination";
 import Table from "@/components/shared/Table";
+import { fetchUsers } from "@/lib/services/user.service";
 
 type UserTable = {
-  id: number;
+  id: string;
   fullname: string;
-  gender: string;
-  address: string;
-  nickName: string;
-  gmail: string;
+  email: string;
   phone: string;
-  status: number; // Trạng thái người dùng (ví dụ: 'active', 'inactive')
-  job: string; // Nghề nghiệp
-  bio: string; // Giới thiệu về bản thân
-  hobbies: string[]; // Sở thích (danh sách)
-  enrolled: Date; // Ngày tham gia (đăng ký)
+  status: boolean;
+  enrolled: Date;
 };
 
 const columns = [
-  { header: "Username", accessor: "username" },
-  {
-    header: "Fullname",
-    accessor: "fullname",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Created Date",
-    accessor: "createdDate",
-    className: "hidden lg:table-cell",
-  },
+  { header: "Fullname", accessor: "fullname" },
   { header: "Email", accessor: "email" },
   { header: "Phone", accessor: "phone" },
-  { header: "Status", accessor: "status", className: "hidden lg:table-cell" },
+  { header: "Enrolled Date", accessor: "enrolled" },
+  { header: "Status", accessor: "status" },
 ];
 
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("");
+  const [usersData, setUsersdata] = useState<any[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUser = async () => {
+      const data = await fetchUsers();
+      const formattedData = data.map((user: any) => ({
+        id: user._id,
+        fullname: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        phone: user.phoneNumber,
+        status: user.status ? "Active" : "Inactive",
+        enrolled: new Date(user.createAt),
+      }));
+      if (isMounted) {
+        setUsersdata(formattedData);
+      }
+    };
+    fetchUser();
+    return () => {
+      isMounted = false;
+    };
+  });
 
   const [sortConfig, setSortConfig] = useState<{
     key: SortableKeys;
@@ -63,21 +72,22 @@ const Page = () => {
     key: "id",
     direction: "ascending",
   });
-  type SortableKeys = "id" | "username" | "fullname" | "createdDate";
 
-  const getValueByKey = (item: (typeof userData)[0], key: SortableKeys) => {
+  type SortableKeys = "id" | "fullname" | "createDate";
+
+  const getValueByKey = (item: (typeof usersData)[0], key: SortableKeys) => {
     switch (key) {
-      case "username":
-        return item.fullname;
+      // case "_id":
+      //   return item.fullname;
       case "fullname":
-        return item.nickName;
-      case "createdDate":
+        return item.fullname;
+      case "createDate":
         return item.enrolled;
       default:
         return "";
     }
   };
-  const sorted = [...userData].sort((a, b) => {
+  const sorted = [...usersData].sort((a, b) => {
     const aValue = getValueByKey(a, sortConfig.key);
     const bValue = getValueByKey(b, sortConfig.key);
 
@@ -102,14 +112,14 @@ const Page = () => {
     // Lọc theo searchQuery
     const matchesSearch =
       item.fullname.toLowerCase().includes(lowerCaseQuery) ||
-      format(item.birthday, "dd/MM/yyyy")
+      format(item.enrolled, "dd/MM/yyyy")
         .toLowerCase()
         .includes(lowerCaseQuery);
 
     // Lọc theo giá trị bộ lọc được chọn
     const matchesFilter =
-      (filterOption === "online" && item.status === 1) ||
-      (filterOption === "offline" && item.status === 0) ||
+      (filterOption === "online" && item.status === true) ||
+      (filterOption === "offline" && item.status === false) ||
       !filterOption; // Không có bộ lọc nào được chọn thì hiển thị tất cả
 
     return matchesSearch && matchesFilter;
@@ -146,16 +156,19 @@ const Page = () => {
 
   const renderRow = (item: UserTable) => (
     <tr key={item.id} className=" my-4 border-t border-gray-300  text-sm ">
-      <td className="px-4 py-2" key={item.id}>
+      <td className="px-4 py-2">
         <Link href={`/user/${item.id}`}>
           <h3 className="text-base">{item.fullname}</h3>
-          <p className="text-base text-gray-500">#00{item.id}</p>
+          <p className="text-base text-gray-500">#{item.id}</p>
         </Link>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-base ">{item.fullname}</p>
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <p className="text-base ">{item.email}</p>
       </td>
-      <td className="hidden px-4 py-2 md:table-cell" key={item.id}>
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <p className="text-base text-gray-500">{item.phone}</p>
+      </td>
+      <td className="hidden px-4 py-2 md:table-cell">
         <div className="flex w-full flex-col ">
           <p className="text-base">{format(item.enrolled, "PPP")}</p>
           <p className="pt-1 text-base text-gray-500">
@@ -167,15 +180,9 @@ const Page = () => {
           </p>
         </div>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-base text-gray-500">{item.gmail}</p>
-      </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-base text-gray-500">{item.phone}</p>
-      </td>
 
       <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        {item.status ? <Active /> : <Off />}
+        {item.status === true ? <Active /> : <Off />}
       </td>
     </tr>
   );
@@ -183,7 +190,6 @@ const Page = () => {
     <div className="background-light700_dark400 text-dark100_light500 flex size-full flex-col p-4 text-base">
       <Headers />
       <div className=" mt-4 w-full rounded-md shadow-md">
-        {/* TOP */}
         <div className=" mt-0 flex w-full flex-col items-center justify-between gap-4 rounded-md md:flex-row">
           <div className="w-full px-4">
             <TableSearch onSearch={setSearchQuery} />
@@ -226,8 +232,8 @@ const Page = () => {
           <Table
             columns={columns}
             renderRow={renderRow}
-            data={currentData} // Pass sorted data to the table
-            onSort={(key: string) => requestSort(key as SortableKeys)} // Sorting function
+            data={currentData}
+            onSort={(key: string) => requestSort(key as SortableKeys)}
           />
         </div>
         {/* PAGINATION */}
