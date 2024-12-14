@@ -3,24 +3,10 @@ import Image from "next/image";
 import React from "react";
 import { format } from "date-fns"; // Import format từ date-fns
 import LableValue from "@/components/header/LableValue";
-type User = {
-  id: number;
-  fullname: string;
-  gender: string;
-  address: string;
-  nickName: string;
-  gmail: string;
-  phone: string;
-  status: number; // Trạng thái người dùng (ví dụ: 'active', 'inactive')
-  job: string; // Nghề nghiệp
-  bio: string; // Giới thiệu về bản thân
-  hobbies: string[]; // Sở thích (danh sách)
-  enrolled: Date; // Ngày tham gia (đăng ký)
-};
 
-const GeneralInformation = ({ item }: { item: User }) => {
+const GeneralInformation = ({ item }: any) => {
   return (
-    <div className="w-full pt-4 flex flex-col">
+    <div className="flex w-full flex-col pt-4">
       <div
         className="self-center"
         style={{
@@ -31,13 +17,16 @@ const GeneralInformation = ({ item }: { item: User }) => {
         }}
       >
         <Image
-          src="https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg"
+          src={
+            item?.background ||
+            "https://i.pinimg.com/1200x/50/51/d4/5051d41e6bf1a0b3806f4ce4cc267cac.jpg"
+          }
           alt="background"
           layout="fill" // Lấp đầy khung
           objectFit="cover" // Cắt ảnh để phù hợp với khung
         />
       </div>
-      <div className="w-full flex gap-24 p-4 pt-8">
+      <div className="flex w-full gap-24 p-4 pt-8">
         <div
           className="self-center rounded-[10px]"
           style={{
@@ -48,29 +37,36 @@ const GeneralInformation = ({ item }: { item: User }) => {
           }}
         >
           <Image
-            src="https://i.pinimg.com/originals/0f/a9/d8/0fa9d8105c132de5230495077d15f01c.jpg"
+            src={
+              item?.avatar ||
+              "https://i.pinimg.com/1200x/50/51/d4/5051d41e6bf1a0b3806f4ce4cc267cac.jpg"
+            }
             alt="background"
             layout="fill" // Lấp đầy khung
             objectFit="cover" // Cắt ảnh để phù hợp với khung
           />
         </div>
         <div className="flex flex-col self-center ">
-          <LableValue label="Fullname" value={item.fullname} />
-          <LableValue
+          <LableValue label="Fullname" value={item?.firstName} />
+          {/* <LableValue
             label="Date of birth"
-            value={format(item.enrolled, "PPP")}
-          />
-          <LableValue label="Gender" value={item.gender} />
+            value={format(item?.birthDay, "PPP")}
+          /> */}
+          <LableValue label="Gender" value={item?.gender ? "Female" : "Male"} />
         </div>
         <div className="flex flex-col self-center">
-          <LableValue label="ID" value={item.id.toString()} />
-          <LableValue label="Email" value={item.gmail} />
-          <LableValue label="Phone Number" value={item.phone} />
+          <LableValue label="ID" value={item?._id} />
+          <LableValue label="Email" value={item?.email} />
+          <LableValue label="Phone Number" value={item?.phoneNumber} />
         </div>
       </div>
       <div className="flex flex-col p-4">
-        <LableValue label="Address" value={item.address} />
-        <LableValue label="Nickname" value={item.nickName} />
+        <LableValue label="Address" value={item?.address} />
+        <LableValue label="Nickname" value={item?.nickName} />
+        {/* <LableValue
+          label="Attend Date"
+          value={format(item?.attendDate, "PPP")}
+        /> */}
       </div>
     </div>
   );

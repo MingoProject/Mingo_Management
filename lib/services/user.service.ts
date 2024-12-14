@@ -8,14 +8,13 @@ import {
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-export async function fetchUsers(): Promise<UserResponseDTO[]> {
+export async function fetchUsers() {
   try {
     const response = await fetch(`${BASE_URL}/user/all`);
     if (!response.ok) {
       throw new Error("Error fetching users");
     }
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Failed to fetch users:", error);
