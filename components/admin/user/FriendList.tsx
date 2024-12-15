@@ -68,18 +68,18 @@ const FriendList = ({
     key: "id",
     direction: "ascending",
   });
-  type SortableKeys = "username" | "id" | "fullname" | "email" | "phone";
+  type SortableKeys = "id" | "fullname" | "enrolled" | "email" | "phone";
 
-  const getValueByKey = (item: (typeof friendsData)[0], key: SortableKeys) => {
+  const getValueByKey = (item: (typeof sorted)[0], key: SortableKeys) => {
     switch (key) {
-      case "username":
-        return item.fullname;
-      case "id":
-        return item.id;
       case "fullname":
         return item.fullname;
+      case "enrolled":
+        return item.enrolled;
+      case "id":
+        return item.id;
       case "email":
-        return item.gmail;
+        return item.email;
       case "phone":
         return item.phone;
       default:

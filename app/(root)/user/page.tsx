@@ -63,7 +63,7 @@ const Page = () => {
     return () => {
       isMounted = false;
     };
-  });
+  }, []);
 
   const [sortConfig, setSortConfig] = useState<{
     key: SortableKeys;
@@ -73,20 +73,25 @@ const Page = () => {
     direction: "ascending",
   });
 
-  type SortableKeys = "id" | "fullname" | "createDate";
+  type SortableKeys = "id" | "fullname" | "enrolled" | "email" | "phone";
 
-  const getValueByKey = (item: (typeof usersData)[0], key: SortableKeys) => {
+  const getValueByKey = (item: UserTable, key: SortableKeys) => {
     switch (key) {
-      // case "_id":
-      //   return item.fullname;
       case "fullname":
         return item.fullname;
-      case "createDate":
+      case "enrolled":
         return item.enrolled;
+      case "id":
+        return item.id;
+      case "email":
+        return item.email;
+      case "phone":
+        return item.phone;
       default:
         return "";
     }
   };
+
   const sorted = [...usersData].sort((a, b) => {
     const aValue = getValueByKey(a, sortConfig.key);
     const bValue = getValueByKey(b, sortConfig.key);
@@ -99,6 +104,7 @@ const Page = () => {
     }
     return 0;
   });
+
   const requestSort = (key: SortableKeys) => {
     let direction: "ascending" | "descending" = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -109,22 +115,24 @@ const Page = () => {
 
   const filterData = sorted.filter((item) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
-    // Lọc theo searchQuery
+
+    // Lọc theo searchQuery: fullname, email, và phone
     const matchesSearch =
       item.fullname.toLowerCase().includes(lowerCaseQuery) ||
+      item.email.toLowerCase().includes(lowerCaseQuery) ||
+      item.phone.toLowerCase().includes(lowerCaseQuery) ||
       format(item.enrolled, "dd/MM/yyyy")
         .toLowerCase()
         .includes(lowerCaseQuery);
 
-    // Lọc theo giá trị bộ lọc được chọn
+    // Lọc theo bộ lọc trạng thái (online/offline)
     const matchesFilter =
-      (filterOption === "online" && item.status === true) ||
-      (filterOption === "offline" && item.status === false) ||
+      (filterOption === "online" && item.status === "Active") ||
+      (filterOption === "offline" && item.status === "Inactive") ||
       !filterOption; // Không có bộ lọc nào được chọn thì hiển thị tất cả
 
     return matchesSearch && matchesFilter;
   });
-
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 8;
   // const totalPages = Math.ceil(userData.length / rowsPerPage);
