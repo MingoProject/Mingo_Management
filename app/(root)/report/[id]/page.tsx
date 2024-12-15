@@ -1,10 +1,13 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { userData, posts } from "@/components/shared/data";
 import HeaderWithButton from "@/components/header/HeaderWithButton";
 import TilteIcon from "@/components/header/TilteIcon";
 import { faAddressCard } from "@fortawesome/free-solid-svg-icons";
 import PostedUser from "@/components/admin/content/PostedUser";
 import UserReportInformation from "@/components/admin/report/UserReportInformation";
+import { ReportResponseDTO } from "@/dtos/ReportDTO";
+import { fetchReport } from "@/lib/services/report.service";
 
 interface Params {
   id: number;
@@ -13,11 +16,35 @@ interface Params {
 const Page = ({ params }: { params: Params }) => {
   const { id } = params;
 
-  const userDetail = userData.find((user) => user.id === Number(id));
-  const postDetail = posts.find((post) => post.id === Number(id));
+  const [isReportUser, setIsReport] = useState<ReportResponseDTO[]>([]);
 
-  if (!userDetail) {
-    return <div>User not found</div>;
+  useEffect(() => {
+    const fetchRepor = async () => {
+      try {
+        const data = await fetchReport();
+
+        // Lọc những báo cáo có entityType là 'user' (so với chữ thường)
+        const filteredReports = data.filter(
+          (report) => report.entityType.toLowerCase() === "user"
+        );
+
+        setIsReport(filteredReports);
+      } catch (error) {
+        console.error("Error fetching report user", error);
+      }
+    };
+
+    fetchRepor();
+  }, []); // Bỏ `isReportUser` khỏi dependency array
+
+  const reportDetail = isReportUser.find((user) => user._id === id.toString());
+
+  if (!reportDetail) {
+    return (
+      <div className="w-[100%] h-screen items-center justify-center flex">
+        <div className="loader"></div>
+      </div>
+    );
   }
 
   return (
@@ -25,12 +52,12 @@ const Page = ({ params }: { params: Params }) => {
       <HeaderWithButton title="Report User Detail" type={2} />
       <div className="w-full rounded-[10px] p-4 shadow-sm">
         <TilteIcon title="Created User" icon={faAddressCard} />
-        <PostedUser item={userDetail} />
+        <PostedUser item={reportDetail.createdById} />
         <TilteIcon title="Reported User" icon={faAddressCard} />
-        <PostedUser item={userDetail} />
+        <PostedUser item={reportDetail.reportedId} />
         <TilteIcon title="Report Information" icon={faAddressCard} />
-        {postDetail ? (
-          <UserReportInformation item={postDetail} />
+        {reportDetail ? (
+          <UserReportInformation item={reportDetail} />
         ) : (
           <div>Post not found</div>
         )}
