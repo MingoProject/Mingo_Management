@@ -295,3 +295,55 @@ export async function getMyVideos(id: string | null) {
     throw error;
   }
 }
+
+export async function getMySavedPosts(id: string | null) {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/user/get-my-saved-posts?userId=${id}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Error fetching posts");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+    throw error;
+  }
+}
+
+export async function getMyLikedPosts(id: string | null) {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/user/get-my-liked-posts?userId=${id}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Error fetching posts");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+    throw error;
+  }
+}
+
+export async function getPostById(id: string | null) {
+  try {
+    const response = await fetch(`${BASE_URL}/post/get-post?postId=${id}`);
+
+    if (!response.ok) {
+      throw new Error("Error fetching post");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch post:", error);
+    throw error;
+  }
+}
