@@ -1,6 +1,10 @@
 import { CommentResponseDTO } from "@/dtos/CommentDTO";
 import { MediaResponseDTO } from "@/dtos/MediaDTO";
-import { PostCreateDTO, PostResponseDTO } from "@/dtos/PostDTO";
+import {
+  MangementPostResponseDTO,
+  PostCreateDTO,
+  PostResponseDTO,
+} from "@/dtos/PostDTO";
 import { UserResponseDTO } from "@/dtos/UserDTO";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -171,6 +175,25 @@ export async function getLikesByPostId(
     return data;
   } catch (error) {
     console.error("Failed to fetch likes by postId:", error);
+    throw error;
+  }
+}
+
+export async function getManagementPostById(
+  postId: String
+): Promise<MangementPostResponseDTO> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/post/get-management-post?postId=${postId}`
+    );
+    if (!response.ok) {
+      throw new Error("Error fetching medias by postId");
+    }
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch medias by postId:", error);
     throw error;
   }
 }

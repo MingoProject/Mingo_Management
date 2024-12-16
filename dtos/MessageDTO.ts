@@ -1,116 +1,164 @@
-import { Schema } from "mongoose";
-
-export interface ImageContent {
-  type: "image";
-  url: string;
-  altText?: string;
-}
-export interface LinkContent {
-  type: "link";
-  url: string;
-  title?: string;
-}
 export interface FileContent {
-  type: "file";
   fileName: string;
-  fileUrl: string;
-  fileType: string;
+  url: string;
+  publicId: string;
+  bytes: string;
+  width: string;
+  height: string;
+  format: string;
+  type: string;
 }
 
-export interface VideoContent {
-  type: "video";
-  fileName: string;
-  fileUrl: string;
-  fileType: string;
-  duration: number;
+export interface RequestSendMessageDTO {
+  boxId: string;
+  content: string | FileContent;
 }
 
-export interface VoiceContent {
-  type: "voice";
-  fileName: string;
-  fileUrl: string;
-  fileType: string;
-  duration: number;
+export interface UserInfoBox {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  nickName: string;
+  avatar: string;
+  phone: string;
 }
 
-export interface PostContent {
-  type: "post";
-  userId: string;
-  likedIds?: string[];
-  shares?: string[];
-  comments?: string[];
-  content: string;
+export interface MessageBoxDTO {
+  _id: string;
+  senderId: string;
+  receiverIds: UserInfoBox[];
+  messageIds: string[];
+  groupName: string;
+  groupAva: string[];
+  flag: boolean;
+  pin: boolean;
+  createAt: string;
+  createBy: string;
+  lastMessage: ResponseMessageDTO;
+  readStatus: boolean;
 }
 
-export interface IconContent {
-  type: "icon";
-  name: string;
-}
-
-export interface GPSContent {
-  type: "gps";
-  latitude: number; // Vĩ độ
-  longitude: number; // Kinh độ
-  description?: string; // Mô tả địa điểm (tuỳ chọn)
-}
-
-export interface SegmentMessageDTO {
-  groupId?: string;
-  userId: string;
-  userName: string;
-  ava: string;
-  content:
-    | string
-    | ImageContent
-    | LinkContent
-    | FileContent
-    | VideoContent
-    | GPSContent
-    | IconContent
-    | PostContent
-    | VoiceContent;
-  time: Date;
-  recipientId: string[];
+export interface MessageBoxGroupDTO {
+  _id: string;
+  senderId: UserInfoBox[];
+  receiverIds: UserInfoBox[];
+  messageIds: string[];
+  groupName: string;
+  groupAva: string[];
+  flag: boolean;
+  pin: boolean;
+  createAt: string;
+  createBy: string;
+  lastMessage: ResponseMessageDTO;
+  readStatus: boolean;
 }
 
 export interface ResponseMessageBoxDTO {
-  messageBoxId: string;
-  messageBox: {
-    senderId: string;
-    receiverIds: string[];
-    messageIds: string[];
-    flag: boolean;
-    createAt: Date;
-    createBy: Schema.Types.ObjectId;
-  };
+  box: MessageBoxDTO[];
+  adminId: string;
 }
 
-export interface Content {
+export interface DetailMessageBoxDTO {
   _id: string;
-  content:
-    | string
-    | ImageContent
-    | LinkContent
-    | FileContent
-    | VideoContent
-    | GPSContent
-    | IconContent
-    | PostContent
-    | VoiceContent;
-  createAt: Date;
-  createBy: Schema.Types.ObjectId;
+  senderId: UserInfoBox;
+  receiverIds: UserInfoBox[];
+  messageIds: string[];
+  groupName: string;
+  groupAva: string[];
+  flag: boolean;
+  pin: boolean;
+  createAt: string;
+  createBy: string;
+  readStatus: boolean;
 }
 
-export interface MessageDTO {
-  _id: string;
+export interface Text {
+  id: string;
+  text: string;
+  contentId: FileContent;
+  timestamp: Date;
+  createBy: string;
+  status: boolean;
+}
+
+export interface ResponseMessageDTO {
+  id: string;
   flag: boolean;
   readedId: string[];
-  contentModel: string;
-  createAt: Date;
-  createBy: Schema.Types.ObjectId;
+  text: string;
+  contentId: FileContent;
+  boxId: string;
+  createAt: string;
+  createBy: string;
+  isReact: boolean;
 }
 
-export interface ResponseSendingDTO {
-  populatedMessage: MessageDTO;
-  messageBox: ResponseMessageBoxDTO;
+export interface ItemChat {
+  id: string;
+  userName: string;
+  avatarUrl: string;
+  status: string;
+  lastMessage: Text;
+  isRead: boolean;
+  receiverId: string | undefined;
+  senderId: string | undefined;
+}
+
+export interface ItemHeader {
+  id: string;
+  userName: string;
+  avatarUrl: string;
+  status: string;
+  receiverId: string; // Giả sử đây là ID của người nhận
+  senderId: string; // Giả sử đây là ID của người gửi
+}
+
+export interface ChatResponse {
+  success: boolean;
+  messages: ResponseMessageDTO[];
+}
+
+export interface FindMessageResponse {
+  success: boolean;
+  messages: ResponseMessageDTO[];
+}
+
+export interface GroupCreateDTO {
+  membersIds: string[];
+  leaderId: string;
+  groupName: string;
+  groupAva: string | null;
+}
+
+export interface PusherRevoke {
+  id: string;
+  flag: boolean;
+  isReact: boolean;
+  text: string;
+  boxId: string;
+  action: string;
+  createAt: string;
+  createBy: string;
+}
+
+export interface PusherDelete {
+  id: string;
+  flag: boolean;
+  visibility: boolean;
+  isReact: boolean;
+  text: string;
+  boxId: string;
+  action: string;
+  createAt: string;
+  createBy: string;
+}
+
+export interface ManagementMessageBoxDTO {
+  _id: string;
+  receiverIds: {
+    id: string;
+    fullname: string;
+    avatar: string;
+  }[];
+  createAt: string;
 }

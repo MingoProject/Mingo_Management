@@ -118,13 +118,15 @@ const UserTab = () => {
 
   const filterData = isReportUser.filter((item) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
-    // Lọc theo searchQuery
+
+    // Lọc theo searchQuery với kiểm tra an toàn
     const matchesSearch =
-      item.title?.toLowerCase().includes(lowerCaseQuery) ||
-      item.content.toLowerCase().includes(lowerCaseQuery) ||
-      format(item.createdAt, "dd/MM/yyyy")
-        .toLowerCase()
-        .includes(lowerCaseQuery);
+      (item.title && item.title.toLowerCase().includes(lowerCaseQuery)) ||
+      (item.content && item.content.toLowerCase().includes(lowerCaseQuery)) ||
+      (item.createdAt &&
+        format(item.createdAt, "dd/MM/yyyy")
+          .toLowerCase()
+          .includes(lowerCaseQuery));
 
     // Lọc theo giá trị bộ lọc được chọn
     const matchesFilter =
@@ -190,7 +192,7 @@ const UserTab = () => {
         <p className="text-base ">
           <div className="flex w-full flex-col ">
             <p>{format(item.createdAt, "PPP")}</p>
-            <p className="pt-1 text-base text-gray-500">
+            <p className="pt-1 text-xs text-gray-500">
               {new Date(item.createdAt).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -207,9 +209,19 @@ const UserTab = () => {
 
       <td className="hidden px-4 py-2 lg:table-cell" key={item.status}>
         <p className="text-base text-gray-500">
-          {item.status === 1 ? (
+          {item.status === 0 ? (
             <MyButton
-              title="Considered"
+              title="Pending"
+              backgroundColor="bg-light-yellow"
+              color="text-yellow-600"
+              fontWeight="font-medium"
+              fontSize="text-[12px]"
+              height="h-[30px]"
+              width="w-[143px]"
+            />
+          ) : item.status === 1 ? (
+            <MyButton
+              title="Confirmed"
               backgroundColor="bg-custom-green"
               color="text-green-500"
               fontWeight="font-medium"
@@ -219,7 +231,7 @@ const UserTab = () => {
             />
           ) : (
             <MyButton
-              title="Unconsidered"
+              title="Rejected"
               backgroundColor="bg-light-red"
               color="text-red-500"
               fontWeight="font-medium"
