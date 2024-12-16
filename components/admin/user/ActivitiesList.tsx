@@ -3,38 +3,19 @@ import TableSearch from "@/components/shared/TableSearch";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { userData } from "@/components/shared/data";
-import Active from "@/components/cards/Active";
-import Off from "@/components/cards/Off";
 import Table from "@/components/shared/Table";
-import MyButton from "@/components/shared/MyButton";
-
-type User = {
-  id: number;
-  fullname: string;
-  gender: string;
-  address: string;
-  nickName: string;
-  gmail: string;
-  phone: string;
-  status: number; // Trạng thái người dùng (ví dụ: 'active', 'inactive')
-  job: string; // Nghề nghiệp
-  bio: string; // Giới thiệu về bản thân
-  hobbies: string[]; // Sở thích (danh sách)
-  enrolled: Date; // Ngày tham gia (đăng ký)
-};
 
 type ActivityType = "save" | "like" | "reported";
 
 const columns = [
   {
     header: "Posted User",
-    accessor: "fullname",
+    accessor: "postedUser",
     className: " text-lg font-md",
   },
   {
     header: "ID",
-    accessor: "fullname",
+    accessor: "id",
     className: "hidden md:table-cell text-lg font-md",
   },
   {
@@ -44,77 +25,55 @@ const columns = [
   },
   {
     header: "Content",
-    accessor: "gmail",
+    accessor: "content",
     className: "hidden lg:table-cell text-lg font-md",
   },
-  {
-    header: "Like At",
-    accessor: "createdDate",
-    className: "hidden lg:table-cell text-lg font-md",
-  },
+  // {
+  //   header: "Like At",
+  //   accessor: "createdDate",
+  //   className: "hidden lg:table-cell text-lg font-md",
+  // },
 
   { header: "Type", accessor: "type", className: " text-lg font-md" },
 ];
 
-const ActivitiesList = () => {
+const ActivitiesList = ({ savedPosts, likedPosts }: any) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("");
   const [activeTab, setActiveTab] = useState<ActivityType>("save");
   const [isMounted, setIsMounted] = useState(false);
 
+  const getFilteredData = () => {
+    switch (activeTab) {
+      case "save":
+        return savedPosts;
+      case "like":
+        return likedPosts;
+      case "reported":
+        return likedPosts; // Sử dụng dữ liệu "likedPosts" cho "reported"
+      default:
+        return savedPosts;
+    }
+  };
+
   const [sortConfig, setSortConfig] = useState<{
-    key: SortableKeys;
+    key: string;
     direction: "ascending" | "descending";
   }>({
-    key: "id",
+    key: "createdDate",
     direction: "ascending",
   });
-  type SortableKeys = "username" | "id" | "fullname" | "email" | "phone";
 
-  const getValueByKey = (item: (typeof userData)[0], key: SortableKeys) => {
-    switch (key) {
-      case "username":
-        return item.fullname;
-      case "id":
-        return item.id;
-      case "fullname":
-        return item.fullname;
-      case "email":
-        return item.gmail;
-      case "phone":
-        return item.phone;
-      default:
-        return "";
-    }
-  };
-  const sorted = [...userData].sort((a, b) => {
-    const aValue = getValueByKey(a, sortConfig.key);
-    const bValue = getValueByKey(b, sortConfig.key);
-
-    if (aValue < bValue) {
-      return sortConfig.direction === "ascending" ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return sortConfig.direction === "ascending" ? 1 : -1;
-    }
-    return 0;
-  });
-  const requestSort = (key: SortableKeys) => {
-    let direction: "ascending" | "descending" = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const filterData = sorted.filter((item) => {
+  const filterData = getFilteredData().filter((item: any) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
+
     // Lọc theo searchQuery
     const matchesSearch =
-      item.fullname.toLowerCase().includes(lowerCaseQuery) ||
-      item.gmail.toLowerCase().includes(lowerCaseQuery) ||
-      item.phone.toLowerCase().includes(lowerCaseQuery) ||
-      format(item.enrolled, "dd/MM/yyyy")
+      item.author.firstName.toLowerCase().includes(lowerCaseQuery) ||
+      item.author.lastName.toLowerCase().includes(lowerCaseQuery) ||
+      item.content.toLowerCase().includes(lowerCaseQuery) ||
+      item._id.toLowerCase().includes(lowerCaseQuery) ||
+      format(item.createAt, "dd/MM/yyyy")
         .toLowerCase()
         .includes(lowerCaseQuery);
 
@@ -127,6 +86,27 @@ const ActivitiesList = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const sorted = [...filterData].sort((a, b) => {
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+
+    if (aValue < bValue) {
+      return sortConfig.direction === "ascending" ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortConfig.direction === "ascending" ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const requestSort = (key: string) => {
+    let direction: "ascending" | "descending" = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -135,35 +115,50 @@ const ActivitiesList = () => {
     return null;
   }
 
-  const renderRow = (item: User) => (
-    <tr key={item.id} className=" my-4 border-t border-gray-300  text-sm ">
-      <td className="px-4 py-2" key={item.id}>
-        <Link href={`/post/${item.id}`}>
-          <h3>{item.fullname}</h3>
-          <p className="text-xs text-gray-500">#00{item.id}</p>
+  const renderRow = (item: any) => (
+    <tr key={item._id} className=" my-4 border-t border-gray-300  text-sm ">
+      <td className="px-4 py-2">
+        <Link href={`/post/${item.author._id}`}>
+          <h3>
+            {item.author.firstName} {item.author.lastName}
+          </h3>
+          <span className="text-xs text-gray-500">#{item._id}</span>
         </Link>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm ">{item.fullname}</p>
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <span className="text-sm ">{item._id}</span>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm ">
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <span className="text-sm ">
           <div className="flex w-full flex-col ">
-            <p>{format(item.enrolled, "PPP")}</p>
-            <p className="pt-1 text-xs text-gray-500">
-              {new Date(item.enrolled).toLocaleTimeString("en-US", {
+            <span>{format(item.createAt, "PPP")}</span>
+            <span className="pt-1 text-xs text-gray-500">
+              {new Date(item.createAt).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               })}
-            </p>
+            </span>
           </div>
-        </p>
+        </span>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm ">{item.gmail}</p>
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <span className="text-sm ">{item.content}</span>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
+
+      <td className="hidden px-4 py-2 lg:table-cell">
+        <button
+          className={`${
+            item.media.length > 0
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-green-100 text-green-800"
+          } rounded-xl px-4 py-2 text-sm`}
+        >
+          {item.media.length > 0 ? "Media" : "Status"}
+        </button>
+      </td>
+
+      {/* <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
         <p className="text-sm ">
           <div className="flex w-full flex-col ">
             <p>{format(item.enrolled, "PPP")}</p>
@@ -221,7 +216,7 @@ const ActivitiesList = () => {
             />
           )}
         </p>
-      </td>
+      </td> */}
     </tr>
   );
 
@@ -253,8 +248,8 @@ const ActivitiesList = () => {
         <Table
           columns={columns}
           renderRow={renderRow}
-          data={filterData} // Pass sorted data to the table
-          onSort={(key: string) => requestSort(key as SortableKeys)} // Sorting function
+          data={sorted} // Pass sorted data to the table
+          onSort={(key: string) => requestSort(key)} // Sorting function
         />
       </div>
     </div>

@@ -7,12 +7,16 @@ import OtherInformation from "@/components/admin/user/OtherInformation";
 import PostList from "@/components/admin/user/PostList";
 import HeaderWithButton from "@/components/header/HeaderWithButton";
 import TilteIcon from "@/components/header/TilteIcon";
+import fetchDetailedPosts from "@/hooks/usePosts";
 import {
   getMyBffs,
   getMyBlocks,
   getMyFollowings,
   getMyFriends,
+  getMyLikedPosts,
+  getMyPosts,
   getMyProfile,
+  getMySavedPosts,
 } from "@/lib/services/user.service";
 import { faAddressCard } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
@@ -29,6 +33,9 @@ const Page = ({ params }: { params: Params }) => {
   const [followingsData, setFollowingsData] = useState<any[]>([]);
   const [blocksData, setBlocksData] = useState<any[]>([]);
   const [followersData, setFollowersData] = useState<any[]>([]);
+  const [savedPosts, setSavedPosts] = useState<any[]>([]);
+  const [likedPosts, setLikedPosts] = useState<any[]>([]);
+  const [myPosts, setMyPosts] = useState<any[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -62,7 +69,7 @@ const Page = ({ params }: { params: Params }) => {
         fullname: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber,
-        status: user.status ? "Active" : "Inactive",
+        status: user.status,
         enrolled: new Date(user.createAt),
         birthday: new Date(user.birthDay),
       }));
@@ -84,7 +91,7 @@ const Page = ({ params }: { params: Params }) => {
         fullname: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber,
-        status: user.status ? "Active" : "Inactive",
+        status: user.status,
         enrolled: new Date(user.createAt),
         birthday: new Date(user.birthDay),
       }));
@@ -106,7 +113,7 @@ const Page = ({ params }: { params: Params }) => {
         fullname: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber,
-        status: user.status ? "Active" : "Inactive",
+        status: user.status,
         enrolled: new Date(user.createAt),
         birthday: new Date(user.birthDay),
       }));
@@ -128,7 +135,7 @@ const Page = ({ params }: { params: Params }) => {
         fullname: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber,
-        status: user.status ? "Active" : "Inactive",
+        status: user.status,
         enrolled: new Date(user.createAt),
         birthday: new Date(user.birthDay),
       }));
@@ -165,6 +172,54 @@ const Page = ({ params }: { params: Params }) => {
     console.log("friends", friendsData);
   }, [profileUser]);
 
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPostsData = async () => {
+      try {
+        const savedData = await getMySavedPosts(id);
+        const likedData = await getMyLikedPosts(id);
+
+        const savedPosts = await fetchDetailedPosts(savedData);
+        const likedPosts = await fetchDetailedPosts(likedData);
+
+        if (isMounted) {
+          setSavedPosts(savedPosts);
+          setLikedPosts(likedPosts);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
+    fetchPostsData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMyPosts = async () => {
+      try {
+        const data = await getMyPosts(id);
+
+        const myPosts = await fetchDetailedPosts(data.userPosts);
+        if (isMounted) {
+          setMyPosts(myPosts);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
+    fetchMyPosts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
   return (
     <div className="text-dark100_light500 background-light700_dark400 flex size-full flex-col p-4">
       <HeaderWithButton title="User Detail" type={1} />
@@ -181,12 +236,14 @@ const Page = ({ params }: { params: Params }) => {
           followingsData={followingsData}
         />
         <TilteIcon title="Activities" />
-        {/* <ActivitiesList /> */}
-        <TilteIcon title="Post" />
-        {/* <PostList /> */}
+        <ActivitiesList savedPosts={savedPosts} likedPosts={likedPosts} />
+        <TilteIcon title="Posts" />
+        <PostList myPosts={myPosts} />
+        <TilteIcon title="Images" />
+        <TilteIcon title="Videos" />
       </div>
     </div>
   );
 };
 
-export default Page; // Đảm bảo tên thành phần viết hoa
+export default Page;
