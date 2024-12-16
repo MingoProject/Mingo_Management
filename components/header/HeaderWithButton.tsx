@@ -5,8 +5,25 @@ import {
   faTrashCan,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/navigation";
 
-const HeaderWithButton = ({ title, type }: { title: string; type: number }) => {
+const HeaderWithButton = ({
+  title,
+  type,
+  onConfirm,
+  onReject,
+}: {
+  title: string;
+  type: number;
+  onConfirm?: () => void;
+  onReject?: () => void;
+}) => {
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
     <div className="flex w-full items-center justify-between">
       <div className="flex w-full flex-col">
@@ -15,10 +32,26 @@ const HeaderWithButton = ({ title, type }: { title: string; type: number }) => {
           Let's check your update today!
         </p>
       </div>
-      {type === 1 ? (
+
+      {type === 0 ? (
         <div className="flex gap-4">
           <MyButton
-            title="Delete"
+            title="Cancel"
+            onClick={handleBack}
+            backgroundColor="bg-gray-200"
+            icon={faXmark}
+            iconPosition="left"
+            width="w-[90px]"
+            height="h-[35px]"
+            fontSize="text-[14px]"
+            fontWeight="font-medium"
+          />
+        </div>
+      ) : type === 1 ? (
+        <div className="flex gap-4">
+          <MyButton
+            title="Reject"
+            onClick={onReject}
             backgroundColor="bg-red-500"
             color="text-white"
             icon={faTrashCan}
@@ -30,6 +63,7 @@ const HeaderWithButton = ({ title, type }: { title: string; type: number }) => {
           />
           <MyButton
             title="Cancel"
+            onClick={handleBack}
             backgroundColor="bg-gray-200"
             icon={faXmark}
             iconPosition="left"
@@ -42,7 +76,8 @@ const HeaderWithButton = ({ title, type }: { title: string; type: number }) => {
       ) : (
         <div className="flex gap-4">
           <MyButton
-            title="Delete"
+            title="Reject"
+            onClick={onReject}
             backgroundColor="bg-red-500"
             color="text-white"
             icon={faTrashCan}
@@ -54,6 +89,7 @@ const HeaderWithButton = ({ title, type }: { title: string; type: number }) => {
           />
           <MyButton
             title="Confirm"
+            onClick={onConfirm}
             backgroundColor="bg-green-500"
             color="text-white"
             icon={faCheck}
@@ -65,6 +101,7 @@ const HeaderWithButton = ({ title, type }: { title: string; type: number }) => {
           />
           <MyButton
             title="Cancel"
+            onClick={handleBack}
             backgroundColor="bg-gray-200"
             icon={faXmark}
             iconPosition="left"

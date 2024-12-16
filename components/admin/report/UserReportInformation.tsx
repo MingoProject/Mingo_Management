@@ -9,10 +9,11 @@ const UserReportInformation = ({ item }: { item: ReportResponseDTO }) => {
   const [showAll, setShowAll] = useState(false);
 
   return (
-    <div className="w-full flex flex-col ">
+    <div className="w-full flex flex-col gap-4 ">
       <div className="w-full flex gap-60 p-4 pb-0">
         <div className="flex flex-col self-start">
           <LableValue label="Report ID" value={item._id.toString()} />
+          <LableValue label="Content" value={item.content} />
         </div>
         <div className="flex flex-col self-center ">
           <LableValue

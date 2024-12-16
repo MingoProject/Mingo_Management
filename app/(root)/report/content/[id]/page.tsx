@@ -7,14 +7,12 @@ import { faAddressCard } from "@fortawesome/free-solid-svg-icons";
 import PostedUser from "@/components/admin/content/PostedUser";
 import UserReportInformation from "@/components/admin/report/UserReportInformation";
 import { ReportResponseDTO } from "@/dtos/ReportDTO";
-import { fetchReport } from "@/lib/services/report.service";
+import { fetchReport, UpdateStatusReport } from "@/lib/services/report.service";
+import { useParams } from "next/navigation";
+import { createNotification } from "@/lib/services/notification.service";
 
-interface Params {
-  id: number;
-}
-
-const Page = ({ params }: { params: Params }) => {
-  const { id } = params;
+const Page = () => {
+  const { id } = useParams();
 
   const [isReport, setIsReport] = useState<ReportResponseDTO[]>([]);
 
@@ -46,9 +44,70 @@ const Page = ({ params }: { params: Params }) => {
       </div>
     );
   }
+
+  const handleConfirm = async () => {
+    try {
+      const data = {
+        reportId: id,
+        status: 1,
+      };
+
+      const param = {
+        senderId: "6728699364c0871fd44f1c94",
+        receiverId: reportDetail.reportedId.id,
+        type: "report_post",
+        postId: id[0],
+      };
+
+      const rs = await UpdateStatusReport(data);
+
+      if (rs) {
+        // Giả sử API trả về một thuộc tính `success` khi thành công
+
+        alert("Cập nhật trạng thái thành công!");
+      } else {
+        alert("Cập nhật trạng thái thất bại. Vui lòng thử lại!");
+      }
+
+      console.log(rs);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái:", error);
+      alert("Có lỗi xảy ra. Vui lòng thử lại sau!");
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      const data = {
+        reportId: id,
+        status: 2, // Trạng thái từ chối
+      };
+
+      const rs = await UpdateStatusReport(data);
+
+      // Kiểm tra kết quả từ API
+      if (rs) {
+        // Giả sử API trả về `success: true` nếu thành công
+        alert("Từ chối báo cáo thành công!");
+      } else {
+        alert("Không thể từ chối báo cáo. Vui lòng thử lại!");
+      }
+
+      console.log(rs); // Log kết quả để kiểm tra chi tiết
+    } catch (error) {
+      console.error("Lỗi khi từ chối báo cáo:", error);
+      alert("Có lỗi xảy ra. Vui lòng thử lại sau!");
+    }
+  };
+
   return (
     <div className="text-dark100_light500 background-light700_dark400 flex size-full flex-col p-4">
-      <HeaderWithButton title="Report User Detail" type={2} />
+      <HeaderWithButton
+        title="Report Content Detail"
+        type={2}
+        onConfirm={handleConfirm}
+        onReject={handleReject}
+      />
       <div className="w-full rounded-[10px] p-4 shadow-sm">
         <TilteIcon title="Created User" icon={faAddressCard} />
         <PostedUser item={reportDetail.createdById} />

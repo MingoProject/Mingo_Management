@@ -7,36 +7,33 @@ import PaginationUI from "@/components/shared/Pagination";
 import { PaginationProps } from "@/types/pagination";
 import MyButton from "@/components/shared/MyButton";
 import Table from "@/components/shared/Table";
+import { getManagementListChat } from "@/lib/services/message.service";
+import { ManagementMessageBoxDTO } from "@/dtos/MessageDTO";
+import Image from "next/image";
 
 type UserTable = {
-  postedUser: string;
+  boxId: string;
   createdDate: Date; // Kiểu Date để chứa ngày kết thúc
   content: string; // Mảng của kiểu Time chứa thông tin về các thời gian
-  postId: number; // Có thể là trạng thái hoạt động, ví dụ: 1 = Active, 2 = Inactive
+  member: number; // Có thể là trạng thái hoạt động, ví dụ: 1 = Active, 2 = Inactive
   type: number; // Có thể là trạng thái hoạt động, ví dụ: 1 = Active, 2 = Inactive
 };
 
 const columns = [
   {
-    header: "Sender User",
-    accessor: "postedUser",
+    header: "Box ID",
+    accessor: "boxId",
     className: " text-lg font-md",
   },
   {
-    header: "Received ID",
-    accessor: "postId",
+    header: "Members",
+    accessor: "member",
     className: "hidden md:table-cell text-lg font-md",
   },
-  { header: "Message ID", accessor: "content", className: " text-lg font-md" },
   {
     header: "Created Date",
     accessor: "createdDate",
     className: " text-lg font-md",
-  },
-  {
-    header: "Type",
-    accessor: "type",
-    className: "hidden lg:table-cell text-lg font-md",
   },
 ];
 
@@ -44,30 +41,44 @@ const MessageTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("");
 
+  const [isReportUser, setIsReportUser] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        // Lấy dữ liệu bài viết
+        const posts = await getManagementListChat();
+        setIsReportUser(posts); // Cập nhật state
+      } catch (error) {
+        console.error("Error fetching report user", error);
+      }
+    };
+
+    fetchPost();
+  }, []); // Bỏ `isReportUser` khỏi dependency array
+
   const [sortConfig, setSortConfig] = useState<{
     key: SortableKeys;
     direction: "ascending" | "descending";
   }>({
-    key: "postId",
+    key: "member",
     direction: "ascending",
   });
-  type SortableKeys = "postedUser" | "postId" | "createdDate" | "type";
+  type SortableKeys = "boxId" | "member" | "createdDate";
 
-  const getValueByKey = (item: (typeof PostData)[0], key: SortableKeys) => {
+  const getValueByKey = (item: (typeof isReportUser)[0], key: SortableKeys) => {
     switch (key) {
-      case "postedUser":
-        return item.postedUser;
-      case "postId":
-        return item.postId;
+      case "boxId":
+        return item.boxId;
+      case "member":
+        return item.member;
       case "createdDate":
         return item.createdDate;
-      case "type":
-        return item.type;
       default:
         return "";
     }
   };
-  const sorted = [...PostData].sort((a, b) => {
+  const sorted = [...isReportUser].sort((a, b) => {
     const aValue = getValueByKey(a, sortConfig.key);
     const bValue = getValueByKey(b, sortConfig.key);
 
@@ -89,24 +100,18 @@ const MessageTab = () => {
 
   const filterData = sorted.filter((item) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
-    // Lọc theo searchQuery
+
+    // Kiểm tra và lọc theo searchQuery
     const matchesSearch =
-      item.postedUser.toLowerCase().includes(lowerCaseQuery) ||
-      item.content.toLowerCase().includes(lowerCaseQuery) ||
-      item.postId.toLowerCase().includes(lowerCaseQuery) ||
-      format(item.createdDate, "dd/MM/yyyy")
-        .toLowerCase()
-        .includes(lowerCaseQuery);
+      (item._id && item._id.toLowerCase().includes(lowerCaseQuery)) ||
+      (item.createdDate &&
+        format(item.createdDate, "dd/MM/yyyy")
+          .toLowerCase()
+          .includes(lowerCaseQuery));
 
     // Lọc theo giá trị bộ lọc được chọn
-    const matchesFilter =
-      (filterOption === "status" && item.type === 0) ||
-      (filterOption === "image" && item.type === 1) ||
-      (filterOption === "video" && item.type === 2) ||
-      (filterOption === "post" && item.type === 3) ||
-      !filterOption; // Không có bộ lọc nào được chọn thì hiển thị tất cả
 
-    return matchesSearch && matchesFilter;
+    return matchesSearch;
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -136,81 +141,45 @@ const MessageTab = () => {
     return null;
   }
 
-  const renderRow = (item: UserTable) => (
+  const renderRow = (item: ManagementMessageBoxDTO) => (
     <tr
-      key={item.postId}
+      key={item._id}
       className="text-dark100_light500  my-4 border-t border-gray-300  text-sm "
     >
-      <td className="px-4 py-2" key={item.postId}>
-        <Link href={`/post/${item.postId}`}>
-          <h3 className="text-base">{item.postedUser}</h3>
-          <p className="text-base text-gray-500">#00{item.postId}</p>
+      <td className="px-4 py-2" key={item._id}>
+        <Link href={`/post/message/${item._id}`}>
+          <h3 className="text-base">{item._id}</h3>
         </Link>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
-        <p className="text-base ">{item.postId}</p>
-      </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
-        <p className="text-base ">{item.content}</p>
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
+        {item.receiverIds.map((it) => (
+          <div className="flex gap-2 items-center">
+            <Link key={it.id} href={`/user/${it.id}`}>
+              <Image
+                src={it.avatar ? it.avatar : "/assets/images/default-user.png"}
+                height={20}
+                width={20}
+                alt="user avatar"
+                className="h-auto w-full object-cover rounded-full"
+              />
+            </Link>
+            <p>{it.fullname}</p>
+          </div>
+        ))}
       </td>
 
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
         <p className="text-base ">
           <div className="flex w-full flex-col ">
-            <p>{format(item.createdDate, "PPP")}</p>
+            <p>{format(item.createAt, "PPP")}</p>
             <p className="pt-1 text-xs text-gray-500">
-              {new Date(item.createdDate).toLocaleTimeString("en-US", {
+              {new Date(item.createAt).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               })}
             </p>
           </div>
-        </p>
-      </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
-        <p className="text-base text-gray-500">
-          {item.type === 0 ? (
-            <MyButton
-              title="Image"
-              backgroundColor="bg-light-blue"
-              color="text-blue-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : item.type === 1 ? (
-            <MyButton
-              title="Video"
-              backgroundColor="bg-light-yellow"
-              color="text-yellow-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : item.type === 2 ? (
-            <MyButton
-              title="Status"
-              backgroundColor="bg-custom-green"
-              color="text-green-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : (
-            <MyButton
-              title="Post"
-              backgroundColor="bg-light-red"
-              color="text-red-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          )}
         </p>
       </td>
     </tr>
