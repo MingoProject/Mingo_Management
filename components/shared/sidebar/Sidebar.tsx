@@ -1,29 +1,57 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import Image from "next/image";
 import Theme from "./Theme";
 import { sidebarLinks } from "@/constants";
 import { usePathname } from "next/navigation";
 import { Icon } from "@iconify/react";
+import { useAuth } from "@/context/AuthContext";
+import { getMyProfile } from "@/lib/services/user.service";
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const { profile, setProfile, logout } = useAuth();
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          const profileData = await getMyProfile(userId);
+          if (isMounted) {
+            setProfile(profileData.userProfile);
+          }
+        }
+      } catch (err) {
+        // setError("Failed to fetch profile");
+        console.error(err);
+      }
+    };
+
+    fetchProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <nav className="background-light700_dark200 fixed z-50 h-screen w-64 border-r border-gray-100 p-6 shadow-md dark:border-none">
       <div className="background-light700_dark200 flex flex-col items-center">
         <Image
-          src="/assets/images/644ca5c74a1b194f2e0fabe66f3e4d60.jpg"
+          src={profile?.avatar || "/assets/images/capy.jpg"}
           alt="Avatar"
           width={60}
           height={60}
           priority
           className="mb-3 size-20 rounded-full object-cover"
         />
-        <Link href="/admin/dashboard" className="text-dark100_light500">
-          <p className="hidden text-center md:block">Huỳnh Nguyễn</p>
+        <Link href="/" className="text-dark100_light500">
+          <p className="hidden text-center md:block">
+            {profile?.firstName} {profile?.lastName}
+          </p>
         </Link>
       </div>
 

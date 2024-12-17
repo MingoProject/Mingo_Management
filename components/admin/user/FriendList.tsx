@@ -154,49 +154,49 @@ const FriendList = ({
       <td className="px-4 py-2">
         <Link href={`/user/${item.id}`}>
           <h3>{item.fullname}</h3>
-          <p className="text-xs text-gray-500">#{item.id}</p>
+          <span className="text-xs text-gray-500">#{item.id}</span>
         </Link>
       </td>
       <td className="hidden px-4 py-2 lg:table-cell">
-        <p className="text-sm ">{item.email}</p>
+        <span className="text-sm ">{item.email}</span>
       </td>
       <td className="hidden px-4 py-2 lg:table-cell">
-        <p className="text-sm ">{item.phone}</p>
+        <span className="text-sm ">{item.phone}</span>
       </td>
       <td className="hidden px-4 py-2 lg:table-cell">
-        <p className="text-sm ">
+        <span className="text-sm ">
           <div className="flex w-full flex-col ">
-            <p>{format(item.enrolled, "PPP")}</p>
-            <p className="pt-1 text-xs text-gray-500">
+            <span>{format(item.enrolled, "PPP")}</span>
+            <span className="pt-1 text-xs text-gray-500">
               {new Date(item.enrolled).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               })}
-            </p>
+            </span>
           </div>
-        </p>
+        </span>
       </td>
 
       <td className="hidden px-4 py-2 lg:table-cell">
-        <p className="text-sm ">
+        <span className="text-sm ">
           <div className="flex w-full flex-col ">
-            <p>{format(item.birthday, "PPP")}</p>
-            <p className="pt-1 text-xs text-gray-500">
+            <span>{format(item.birthday, "PPP")}</span>
+            <span className="pt-1 text-xs text-gray-500">
               {new Date(item.birthday).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               })}
-            </p>
+            </span>
           </div>
-        </p>
+        </span>
       </td>
 
       <td className="hidden px-4 py-2 lg:table-cell">
-        <p className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500">
           {item.status === false ? <Off /> : <Active />}
-        </p>
+        </span>
       </td>
     </tr>
   );

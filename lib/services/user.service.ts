@@ -347,3 +347,23 @@ export async function getPostById(id: string | null) {
     throw error;
   }
 }
+
+export async function updateUserStatus(token: string | null) {
+  try {
+    const response = await fetch(`${BASE_URL}/user/update-status`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error update status");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Failed to update status", err);
+  }
+}

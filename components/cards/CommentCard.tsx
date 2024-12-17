@@ -1,93 +1,61 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { Icon } from "@iconify/react/dist/iconify.js";
-import { getTimestamp } from "@/lib/utils";
-import CommentMenu from "../forms/comment/Modal";
-import { dislikeComment, likeComment } from "@/lib/services/comment.service";
+// import { Icon } from "@iconify/react/dist/iconify.js";
+// import CommentMenu from "../forms/comment/Modal";
+import ReplyCard from "./ReplyCard";
+// import { createNotification } from "@/lib/services/notification.service";
 
-const CommentCard = ({ comment, setCommentsData, postId }: any) => {
+const CommentCard = ({
+  comment,
+  setCommentsData,
+  // profile,
+  author,
+  // postId,
+  // mediaId,
+}: any) => {
   const [isLiked, setIsLiked] = useState(false);
-  const [numberOfLikes, setNumberOfLikes] = useState(comment.likes.length);
-  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
-    null
-  );
+  const [numberOfLikes, setNumberOfLikes] = useState(comment?.likes.length);
+  // const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
+  //   null
+  // );
+  // const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [showReplies, setShowReplies] = useState(false); // Trạng thái hiển thị replies
+  const [replies, setReplies] = useState([]);
+  // const [newComment, setNewComment] = useState("");
 
-  const handleOpenMenu = (commentId: string) => {
-    setSelectedCommentId(commentId);
-  };
-
-  const handleCloseMenu = () => {
-    setSelectedCommentId(null);
+  const toggleShowReplies = () => {
+    setShowReplies(!showReplies);
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        handleCloseMenu();
+    let isMounted = true;
+    try {
+      if (isMounted) {
+        setReplies(comment.replies);
       }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      isMounted = false;
     };
-  }, []);
+  }, [comment.replies]);
 
-  const handleLikeComment = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (token) {
-        await likeComment(comment._id, token);
-        setIsLiked(!isLiked);
-      } else {
-        console.warn("User is not authenticated");
-      }
-    } catch (error) {
-      console.error("Error in handleLikePost:", error);
-    }
-  };
+  function timeSinceMessage(timestamp: Date | string) {
+    const now = new Date();
+    const messageTimestamp = new Date(timestamp);
+    const diffInMs = now.getTime() - messageTimestamp.getTime();
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
 
-  useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      try {
-        const isUserLiked = comment.likes.some(
-          (like: any) => like._id === userId
-        );
-        setIsLiked(isUserLiked);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }
-  }, [comment.likes]);
-
-  const handleDislikeComment = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (token) {
-        await dislikeComment(comment._id, token);
-
-        setIsLiked(!isLiked);
-      } else {
-        console.warn("User is not authenticated");
-      }
-    } catch (error) {
-      console.error("Error in handleLikePost:", error);
-    }
-  };
-
-  const toggleLike = () => {
-    if (isLiked) {
-      handleDislikeComment();
-      setNumberOfLikes(comment.likes.length - 1);
-    } else {
-      handleLikeComment();
-      setNumberOfLikes(comment.likes.length + 1);
-    }
-  };
+    if (diffInDays > 0) return `${diffInDays} ngày`;
+    if (diffInHours > 0) return `${diffInHours} giờ`;
+    if (diffInMinutes > 0) return `${diffInMinutes} phút`;
+    return `${diffInSeconds} giây`;
+  }
 
   return (
     <div>
@@ -102,25 +70,23 @@ const CommentCard = ({ comment, setCommentsData, postId }: any) => {
 
         <div className="ml-3 flex-1">
           <p className="text-dark100_light500 font-bold">
-            {comment.userId.lastName}
+            {comment.userId.firstName} {comment.userId.lastName}
           </p>
           <div className="flex">
             <p className="text-dark100_light500 inline-block rounded-r-lg rounded-bl-lg border p-2">
               {comment.content}
             </p>
-            <Icon
+            {/* <Icon
               icon="bi:three-dots"
               className="text-dark100_light500 ml-2 mt-3 hidden size-4 group-hover:inline"
-              onClick={() => handleOpenMenu(comment._id)}
-            />
+              // onClick={() => handleOpenMenu(comment._id)}
+            /> */}
           </div>
 
           <div className="mt-2 flex items-center text-sm text-gray-500">
-            <span className="text-gray-600">
-              {getTimestamp(comment.createAt)}
+            <span className="mx-2 text-gray-600">
+              {timeSinceMessage(comment.createAt)}
             </span>
-
-            <span className="mx-2 text-gray-600">·</span>
 
             <div className="flex">
               <button
@@ -129,20 +95,76 @@ const CommentCard = ({ comment, setCommentsData, postId }: any) => {
                     ? "font-bold text-primary-100"
                     : "text-dark100_light500"
                 }`}
-                onClick={toggleLike}
+                // onClick={toggleLike}
               >
-                Thích {numberOfLikes}
+                Like {numberOfLikes}
               </button>
             </div>
 
             <span className="mx-2">·</span>
-            <button className="text-dark100_light500 hover:underline">
-              Trả lời
-            </button>
+            {/* <button
+              className="text-dark100_light500 hover:underline"
+              // onClick={() => setReplyingTo(comment._id)}
+            >
+              Reply
+            </button> */}
           </div>
+
+          {/* Input trả lời
+          {replyingTo === comment._id && (
+            <div className="mt-2 flex">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="w-full rounded-md border bg-transparent p-2"
+                placeholder="Write a reply..."
+              />
+              <button
+                onClick={handleReplyComment}
+                className="mx-2 mt-3 h-10 rounded-lg bg-primary-100 p-2 text-white hover:underline"
+              >
+                Reply
+              </button>
+              <button
+                className="text-2xl text-primary-100"
+                onClick={() => setReplyingTo(null)}
+              >
+                <Icon
+                  icon="ic:round-close"
+                  width="22"
+                  height="22"
+                  className="text-primary-100"
+                />
+              </button>
+            </div>
+          )} */}
+
+          {replies?.length > 0 && (
+            <p
+              className="mb-1 cursor-pointer text-primary-100"
+              onClick={toggleShowReplies}
+            >
+              Có {replies?.length} phản hồi
+            </p>
+          )}
+
+          {showReplies &&
+            replies?.map((reply: any) => (
+              <div key={reply._id} className="group mb-3 flex items-start">
+                <ReplyCard
+                  reply={reply}
+                  setReplies={setReplies}
+                  // profile={profile}
+                  commentId={comment._id}
+                  author={author}
+                  // postId={postId}
+                  // mediaId={mediaId}
+                />
+              </div>
+            ))}
         </div>
 
-        {selectedCommentId === comment._id && (
+        {/* {selectedCommentId === comment._id && (
           <div ref={menuRef}>
             <CommentMenu
               commentUserId={comment.userId._id}
@@ -151,9 +173,10 @@ const CommentCard = ({ comment, setCommentsData, postId }: any) => {
               setCommentsData={setCommentsData}
               handleCloseMenu={handleCloseMenu}
               postId={postId}
+              mediaId={mediaId}
             />
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
