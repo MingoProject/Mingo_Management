@@ -1,6 +1,6 @@
-"use client"; // Thêm dòng này để đảm bảo mã chạy ở phía client
+"use client";
 import React, { useState } from "react";
-import { Icon } from "@iconify/react";
+// import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/services/user.service";
 
@@ -49,7 +49,7 @@ const FloatingLabelInput = ({ id, label, type, value, setValue }: any) => {
 const SignIn = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -62,17 +62,22 @@ const SignIn = () => {
       const user = await login(userData);
 
       if (user) {
-        localStorage.setItem("token", user.token);
-        const decodedToken = JSON.parse(atob(user.token.split(".")[1]));
-        const userId = decodedToken?.id;
-        localStorage.setItem("userId", userId);
-        router.push("/");
+        const userRoles = user.roles || [];
+        if (userRoles.includes("admin")) {
+          localStorage.setItem("token", user.token);
+          const decodedToken = JSON.parse(atob(user.token.split(".")[1]));
+          const userId = decodedToken?.id;
+          localStorage.setItem("userId", userId);
+          router.push("/");
+        } else {
+          setErrorMessage("You do not have access!");
+        }
       } else {
-        setErrorMessage("Đăng nhập không thành công!");
+        setErrorMessage("Login failed!");
       }
     } catch (error: any) {
-      console.error("Lỗi đăng nhập:", error);
-      setErrorMessage(error.message || "Có lỗi xảy ra.");
+      console.error("Error login:", error);
+      setErrorMessage(error.message || "Error.");
     }
   };
 
@@ -80,22 +85,24 @@ const SignIn = () => {
     <div className="background-light800_dark400 flex h-screen w-full items-center justify-center">
       <div className="background-light700_dark300 my-[110px] w-[549px] rounded-lg px-[55px] py-[51px] shadow-md">
         <h2 className="text-dark100_light500 mb-6 text-center text-2xl font-bold">
-          Đăng Nhập
+          Login
         </h2>
 
-        {error && <p className="text-center text-red-500">{error}</p>}
-
+        {/* {error && <p className="text-center text-red-500">{error}</p>} */}
+        {errorMessage && (
+          <p className="text-center text-red-500">{errorMessage}</p>
+        )}
         <form className="mt-[74px]" onSubmit={handleSubmit}>
           <FloatingLabelInput
             id="username"
-            label="Tên đăng nhập hoặc Email"
+            label="Phone number"
             type="text"
             value={phoneNumber}
             setValue={setPhoneNumber}
           />
           <FloatingLabelInput
             id="password"
-            label="Mật khẩu"
+            label="Password"
             type="password"
             value={password}
             setValue={setPassword}
@@ -104,17 +111,17 @@ const SignIn = () => {
             type="submit"
             className="mt-5 w-full rounded-lg bg-primary-100 py-2 text-white transition duration-200"
           >
-            Đăng Nhập
+            Login
           </button>
         </form>
 
         <div className="mt-2 text-end">
           <a href="#" className="text-dark100_light500 text-sm hover:underline">
-            Quên mật khẩu?
+            Forget password ?
           </a>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
+        {/* <div className="mt-4 flex items-center justify-between">
           <hr className="grow border-gray-300" />
           <span className="mx-2 text-gray-500">hoặc</span>
           <hr className="grow border-gray-300" />
@@ -137,7 +144,7 @@ const SignIn = () => {
               Đăng ký
             </a>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

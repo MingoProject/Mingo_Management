@@ -3,8 +3,10 @@
 import ActivitiesList from "@/components/admin/user/ActivitiesList";
 import FriendList from "@/components/admin/user/FriendList";
 import GeneralInformation from "@/components/admin/user/GeneralInformation";
+import ImageList from "@/components/admin/user/ImageList";
 import OtherInformation from "@/components/admin/user/OtherInformation";
 import PostList from "@/components/admin/user/PostList";
+import VideoList from "@/components/admin/user/VideoList";
 import HeaderWithButton from "@/components/header/HeaderWithButton";
 import TilteIcon from "@/components/header/TilteIcon";
 import fetchDetailedPosts from "@/hooks/usePosts";
@@ -13,10 +15,12 @@ import {
   getMyBlocks,
   getMyFollowings,
   getMyFriends,
+  getMyImages,
   getMyLikedPosts,
   getMyPosts,
   getMyProfile,
   getMySavedPosts,
+  getMyVideos,
 } from "@/lib/services/user.service";
 import { faAddressCard } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
@@ -36,30 +40,9 @@ const Page = ({ params }: { params: Params }) => {
   const [savedPosts, setSavedPosts] = useState<any[]>([]);
   const [likedPosts, setLikedPosts] = useState<any[]>([]);
   const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [myImages, setMyImages] = useState<any[]>([]);
+  const [myVideos, setMyVideos] = useState<any[]>([]);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchUser = async () => {
-      const data = await getMyFriends(id);
-      const formattedData = data.map((user: any) => ({
-        id: user._id,
-        fullname: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        phone: user.phoneNumber,
-        status: user.status ? "Active" : "Inactive",
-        enrolled: new Date(user.createAt),
-        birthday: new Date(user.birthDay),
-      }));
-      console.log(formattedData);
-      if (isMounted) {
-        setFriendsData(formattedData);
-      }
-    };
-    fetchUser();
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
   useEffect(() => {
     let isMounted = true;
     const fetchUser = async () => {
@@ -148,12 +131,11 @@ const Page = ({ params }: { params: Params }) => {
       isMounted = false;
     };
   }, [id]);
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const data = await getMyProfile(id);
-        console.log("data", data);
+        // console.log("data", data);
 
         if (!data || !data.userProfile) {
           console.error("User profile not found!");
@@ -166,12 +148,6 @@ const Page = ({ params }: { params: Params }) => {
     };
     fetchUser();
   }, [id]);
-
-  useEffect(() => {
-    console.log("profileUser", profileUser);
-    console.log("friends", friendsData);
-  }, [profileUser]);
-
   useEffect(() => {
     let isMounted = true;
     const fetchPostsData = async () => {
@@ -197,7 +173,6 @@ const Page = ({ params }: { params: Params }) => {
       isMounted = false;
     };
   }, [id]);
-
   useEffect(() => {
     let isMounted = true;
     const fetchMyPosts = async () => {
@@ -214,6 +189,44 @@ const Page = ({ params }: { params: Params }) => {
     };
 
     fetchMyPosts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+  useEffect(() => {
+    let isMounted = true;
+    const fetMyImages = async () => {
+      try {
+        const data = await getMyImages(id);
+        if (isMounted) {
+          setMyImages(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
+    fetMyImages();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMyVideos = async () => {
+      try {
+        const data = await getMyVideos(id);
+        if (isMounted) {
+          setMyVideos(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
+    fetchMyVideos();
 
     return () => {
       isMounted = false;
@@ -240,7 +253,9 @@ const Page = ({ params }: { params: Params }) => {
         <TilteIcon title="Posts" />
         <PostList myPosts={myPosts} />
         <TilteIcon title="Images" />
+        <ImageList imagesData={myImages} profileUser={profileUser} />
         <TilteIcon title="Videos" />
+        <VideoList videosData={myVideos} profileUser={profileUser} />
       </div>
     </div>
   );
