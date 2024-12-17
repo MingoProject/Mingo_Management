@@ -159,6 +159,24 @@ export async function getMyFollowings(id: string | null) {
   }
 }
 
+export async function getMyFollowers(id: string | null) {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/user/get-my-followers?userId=${id}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Error fetching followers");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch followers:", error);
+    throw error;
+  }
+}
+
 export async function getMyBlocks(id: string | null) {
   try {
     const response = await fetch(`${BASE_URL}/user/get-my-blocks?userId=${id}`);
@@ -344,6 +362,54 @@ export async function getPostById(id: string | null) {
     return data;
   } catch (error) {
     console.error("Failed to fetch post:", error);
+    throw error;
+  }
+}
+
+export async function updateUserStatus(token: string | null) {
+  try {
+    const response = await fetch(`${BASE_URL}/user/update-status`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error update status");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Failed to update status", err);
+  }
+}
+
+export async function countUsers() {
+  try {
+    const response = await fetch(`${BASE_URL}/user/count`);
+    if (!response.ok) {
+      throw new Error("Error couting users");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to count users:", error);
+    throw error;
+  }
+}
+
+export async function countUsersByAttendDate() {
+  try {
+    const response = await fetch(`${BASE_URL}/user/count-by-attend-date`);
+    if (!response.ok) {
+      throw new Error("Error couting users");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to count users:", error);
     throw error;
   }
 }

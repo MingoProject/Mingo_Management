@@ -2,7 +2,6 @@ import { Pie, PieChart, Cell } from "recharts";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
@@ -17,68 +16,63 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export const description = "A simple pie chart";
 
-const fakeNotification = [
-  { id: "1", content: "You have a new report waiting for approval", status: 1 },
-  { id: "2", content: "You have a new report waiting for approval", status: 1 },
-  { id: "3", content: "You have a new report waiting for approval", status: 1 },
-  { id: "4", content: "You have a new report waiting for approval", status: 1 },
-  { id: "5", content: "You have a new report waiting for approval", status: 1 },
-  { id: "6", content: "You have a new report waiting for approval", status: 1 },
-  { id: "7", content: "You have a new report waiting for approval", status: 0 },
-  { id: "8", content: "You have a new report waiting for approval", status: 0 },
-  { id: "9", content: "You have a new report waiting for approval", status: 1 },
-  {
-    id: "10",
-    content: "You have a new report waiting for approval",
-    status: 0,
-  },
-];
+const Chart = ({ reports }: any) => {
+  const totalNotifications = reports.length;
 
-// Tính toán số lượng thông báo theo trạng thái
-const totalNotifications = fakeNotification.length;
+  const notificationCount = reports.reduce(
+    (acc, notification) => {
+      if (notification.status === 1) {
+        acc.done += 1;
+      }
+      if (notification.status === 0) {
+        acc.inProgress += 1;
+      }
+      if (notification.status === 2) {
+        acc.rejected += 1;
+      }
+      return acc;
+    },
+    { done: 0, inProgress: 0, rejected: 0 }
+  );
 
-const notificationCount = fakeNotification.reduce(
-  (acc, notification) => {
-    if (notification.status === 1) {
-      acc.done += 1;
-    } else {
-      acc.inProgress += 1;
-    }
-    return acc;
-  },
-  { done: 0, inProgress: 0 }
-);
+  const chartData = [
+    {
+      browser: "InProgress",
+      visitors: notificationCount.inProgress,
+      fill: "var(--color-inprogress)", // Màu cho trạng thái InProgress
+    },
+    {
+      browser: "Done",
+      visitors: notificationCount.done,
+      fill: "var(--color-done)", // Màu cho trạng thái Done
+    },
+    {
+      browser: "Rejected",
+      visitors: notificationCount.rejected,
+      fill: "var(--color-rejected)", // Màu cho trạng thái Rejected
+    },
+  ];
 
-// Dữ liệu cho biểu đồ
-const chartData = [
-  {
-    browser: "InProgress",
-    visitors: notificationCount.inProgress, // Số lượng cụ thể
-    fill: "var(--color-inprogress)",
-  },
-  {
-    browser: "Done",
-    visitors: notificationCount.done, // Số lượng cụ thể
-    fill: "var(--color-done)",
-  },
-];
+  // Cấu hình màu sắc cho biểu đồ
+  const chartConfig = {
+    inprogress: {
+      label: "InProgress",
+      color: "#fde047",
+    },
+    done: {
+      label: "Done",
+      color: "#86efac",
+    },
+    rejected: {
+      label: "Rejected",
+      color: "#f87171",
+    },
+  } satisfies ChartConfig;
 
-const chartConfig = {
-  inprogress: {
-    label: "InProgress",
-    color: "white",
-  },
-  done: {
-    label: "Done",
-    color: "#617F67",
-  },
-} satisfies ChartConfig;
-
-const Chart = () => {
   return (
     <Card className="flex size-full flex-col border-none">
       <CardHeader className="text-dark100_light500 items-center pb-0">
-        <CardDescription>Last month</CardDescription>
+        {/* <CardDescription>Last month</CardDescription> */}
       </CardHeader>
       <CardContent className="flex flex-1 items-center justify-center pb-0">
         <ChartContainer config={chartConfig} className="size-full">
@@ -91,7 +85,6 @@ const Chart = () => {
               data={chartData}
               dataKey="visitors"
               nameKey="browser"
-              stroke="#617F67"
               strokeWidth={1}
               fontSize={12}
               labelLine={false}
@@ -108,8 +101,16 @@ const Chart = () => {
                 const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
                 const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
 
-                const labelColor =
-                  chartData[index].browser === "InProgress" ? "black" : "white";
+                let labelColor = "white";
+                const browser = chartData[index].browser;
+
+                if (browser === "InProgress") {
+                  labelColor = "#854d0e";
+                } else if (browser === "Done") {
+                  labelColor = "#166534";
+                } else if (browser === "Rejected") {
+                  labelColor = "#991b1b";
+                }
                 const actualPercentage =
                   (chartData[index].visitors / totalNotifications) * 100;
 
@@ -127,7 +128,7 @@ const Chart = () => {
                       : `${actualPercentage.toFixed(2)}%`}{" "}
                   </text>
                 );
-              }} // Hiển thị phần trăm bên trong biểu đồ
+              }}
             >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -140,7 +141,6 @@ const Chart = () => {
                     <div className="tooltip">
                       <p>{`Status: ${payload[0].name}`}</p>
                       <p>{`Count: ${payload[0].value}`}</p>{" "}
-                      {/* Hiển thị số lượng */}
                     </div>
                   );
                 }
@@ -154,17 +154,23 @@ const Chart = () => {
         <div className="flex w-1/5 items-center gap-2 font-medium leading-none">
           <FontAwesomeIcon
             icon={faSquare}
-            className="text-[16px] text-primary-100"
+            className="text-[16px] text-green-300"
           />
-          <p className="pt-1 text-green-500">Done</p>
+          <p className="pt-1 text-green-800">Done</p>
         </div>
         <div className="flex w-1/5 items-center gap-2 font-medium leading-none">
           <FontAwesomeIcon
             icon={faSquare}
-            className="rounded-[3px] border border-primary-100 text-[14px] text-white"
+            className="text-[16px] text-yellow-300"
           />
-
-          <p className="whitespace-nowrap pt-1 text-red-500">In progress</p>
+          <p className="whitespace-nowrap pt-1 text-yellow-800">In progress</p>
+        </div>
+        <div className="flex w-1/5 items-center gap-2 font-medium leading-none">
+          <FontAwesomeIcon
+            icon={faSquare}
+            className="text-[16px] text-red-400"
+          />
+          <p className="whitespace-nowrap pt-1 text-red-800">Rejected</p>
         </div>
       </CardFooter>
     </Card>

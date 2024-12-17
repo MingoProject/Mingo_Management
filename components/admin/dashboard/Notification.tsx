@@ -1,37 +1,10 @@
 import NotificationCard from "@/components/cards/NotificationCard";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Icon } from "@iconify/react/dist/iconify.js";
 import React from "react";
 
-const fakeNotification = [
-  {
-    id: "1",
-    content: "You have a new report waiting for approval",
-    status: 1,
-  },
-  {
-    id: "2",
-    content: "You have a new report waiting for approval",
-    status: 1,
-  },
-  {
-    id: "3",
-    content: "You have a new report waiting for approval",
-    status: 1,
-  },
-  {
-    id: "4",
-    content: "You have a new report waiting for approval",
-    status: 1,
-  },
-  {
-    id: "5",
-    content: "You have a new report waiting for approval",
-    status: 1,
-  },
-];
-
-const Notification = () => {
+const Notification = ({ notifications }: any) => {
   return (
     <div className="flex h-64 w-full flex-col">
       <div className=" flex w-full flex-col gap-4 ">
@@ -45,13 +18,28 @@ const Notification = () => {
           </span>
         </p>
         <div className=" no-scrollbar flex h-52 w-full flex-col gap-2 overflow-auto">
-          {fakeNotification.map((item) => (
-            <NotificationCard
-              content={item.content}
-              status={item.status}
-              key={item.id}
-            />
-          ))}
+          {notifications.length > 0 ? (
+            notifications.map((item: any) => (
+              <NotificationCard
+                notification={item}
+                // content={item.content}
+                // status={item.status}
+                key={item.id}
+              />
+            ))
+          ) : (
+            <div className="mx-auto ">
+              <Icon
+                icon="material-symbols-light:list-alt-outline-rounded"
+                width="40"
+                height="40"
+                className="text-dark100_light500 mx-auto"
+              />
+              <span className="text-dark100_light500 text-lg">
+                No notifications
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

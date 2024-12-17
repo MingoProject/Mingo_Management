@@ -1,30 +1,84 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import Image from "next/image";
 import Theme from "./Theme";
 import { sidebarLinks } from "@/constants";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
+import { useAuth } from "@/context/AuthContext";
+import { getMyProfile } from "@/lib/services/user.service";
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const { profile, setProfile, logout } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Trạng thái dropdown
+  const router = useRouter();
+  useEffect(() => {
+    let isMounted = true;
+    const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          const profileData = await getMyProfile(userId);
+          if (isMounted) {
+            setProfile(profileData.userProfile);
+          }
+        }
+      } catch (err) {
+        // setError("Failed to fetch profile");
+        console.error(err);
+      }
+    };
+
+    fetchProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setIsDropdownOpen(false);
+    router.push("/sign-in");
+  };
 
   return (
     <nav className="background-light700_dark200 fixed z-50 h-screen w-64 border-r border-gray-100 p-6 shadow-md dark:border-none">
       <div className="background-light700_dark200 flex flex-col items-center">
         <Image
-          src="/assets/images/644ca5c74a1b194f2e0fabe66f3e4d60.jpg"
+          src={profile?.avatar || "/assets/images/capy.jpg"}
           alt="Avatar"
           width={60}
           height={60}
           priority
           className="mb-3 size-20 rounded-full object-cover"
         />
-        <Link href="/admin/dashboard" className="text-dark100_light500">
-          <p className="hidden text-center md:block">Huỳnh Nguyễn</p>
-        </Link>
+        <div
+          className="flex cursor-pointer"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        >
+          <p className="text-dark100_light500 hidden text-center md:block">
+            {profile?.firstName} {profile?.lastName}
+          </p>
+          <Icon
+            icon="iconamoon:arrow-down-2"
+            width="24"
+            height="24"
+            className="text-dark100_light500"
+          />
+        </div>
+        {isDropdownOpen && (
+          <div className="background-light700_dark200 absolute z-50 ml-32 mt-32 w-48 rounded-lg border border-gray-200 bg-white p-2 shadow-lg">
+            <button
+              onClick={handleLogout}
+              className="text-dark100_light500 background-light700_dark200 w-full rounded-lg px-4 py-2 text-left hover:bg-gray-100"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="mt-4 flex items-center justify-center gap-5">
@@ -32,12 +86,10 @@ const Sidebar = () => {
           icon="ion:search-outline"
           className="text-dark100_light500 mr-3 mt-2 text-2xl"
         />
-        <Link href="/notification">
-          <Icon
-            icon="pepicons-pencil:bell"
-            className="text-dark100_light500 mt-2 text-2xl"
-          />
-        </Link>
+        <Icon
+          icon="pepicons-pencil:bell"
+          className="text-dark100_light500 mt-2 text-2xl"
+        />
 
         <Theme />
       </div>

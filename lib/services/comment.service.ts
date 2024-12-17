@@ -211,3 +211,19 @@ export async function getLikesByCommentId(
     throw error;
   }
 }
+
+export async function getCommentByCommentId(commentId: String) {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/comment/get-comment?commentId=${commentId}`
+    );
+    if (!response.ok) {
+      throw new Error("Error fetching comment by commentId");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch comment by commentId:", error);
+    throw error;
+  }
+}
