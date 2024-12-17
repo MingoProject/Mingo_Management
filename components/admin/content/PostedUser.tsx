@@ -6,6 +6,7 @@ import LableValue from "@/components/header/LableValue";
 import MyButton from "@/components/shared/MyButton";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
+import { ReportResponseDTO, UserInfor } from "@/dtos/ReportDTO";
 
 type User = {
   id: number;
@@ -22,12 +23,13 @@ type User = {
   enrolled: Date; // Ngày tham gia (đăng ký)
 };
 
-const PostedUser = ({ item }: { item: User }) => {
+const PostedUser = ({ item }: { item: UserInfor }) => {
   const router = useRouter();
 
   const handleNavigate = () => {
     router.push(`/user/${item.id}`);
   };
+
   return (
     <div className="flex w-full  flex-col pb-4 ">
       <div className="flex w-full gap-24 p-4 pt-8">
@@ -48,17 +50,17 @@ const PostedUser = ({ item }: { item: User }) => {
           />
         </div>
         <div className="flex flex-col self-center ">
-          <LableValue label="Fullname" value={item.fullname} />
           <LableValue
-            label="Date of birth"
-            value={format(item.enrolled, "PPP")}
+            label="Fullname"
+            value={`${item.firstName} ${item.lastName}`}
           />
-          <LableValue label="Gender" value={item.gender} />
+          <LableValue label="Date of birth" value={format(item.dob, "PPP")} />
+          <LableValue label="Gender" value={item.gender ? "Male" : "Female"} />
         </div>
         <div className="flex flex-col self-center">
           <LableValue label="ID" value={item.id.toString()} />
-          <LableValue label="Email" value={item.gmail} />
-          <LableValue label="Phone Number" value={item.phone} />
+          <LableValue label="Email" value={item.email} />
+          <LableValue label="Phone Number" value={item.phoneNumber} />
         </div>
       </div>
       <div className="self-start px-4">

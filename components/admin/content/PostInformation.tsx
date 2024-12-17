@@ -1,73 +1,54 @@
 "use client";
+
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { format } from "date-fns"; // Import format từ date-fns
+import { format } from "date-fns";
 import LableValue from "@/components/header/LableValue";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Table from "@/components/shared/Table";
-import { posts } from "@/components/shared/data";
-
-type Post = {
-  id: number;
-  userId: number;
-  content: string;
-  createAt: Date;
-  location: string;
-  hashtag: string[];
-  tag: string[];
-  privacy: string;
-  attachment: { id: number; src: string }[];
-  like: number;
-  share: number;
-  reaction: { type: string; count: number }[];
-  comment: {
-    commentId: number;
-    author: string;
-    createAt: Date;
-    content: string;
-    parentComment?: number;
-  }[];
-};
+import { MangementPostResponseDTO } from "@/dtos/PostDTO";
+import { getManagementPostById } from "@/lib/services/post.service";
 
 const columns = [
   {
     header: "Author",
     accessor: "author",
-    className: " text-lg font-md",
+    className: "text-lg font-md",
   },
   {
     header: "Comment ID",
-    accessor: "id",
+    accessor: "commentId",
     className: "hidden md:table-cell text-lg font-md",
   },
   {
     header: "Create Date",
-    accessor: "type",
+    accessor: "createAt",
     className: "hidden lg:table-cell text-lg font-md",
   },
   {
     header: "Content",
     accessor: "content",
-    className: " text-lg font-md",
+    className: "text-lg font-md",
   },
   {
     header: "Parent Comment",
-    accessor: "type",
-    className: " text-lg font-md",
+    accessor: "parentComment",
+    className: "text-lg font-md",
   },
 ];
 
-const PostInformation = ({ item }: { item: Post }) => {
+type SortableKeys =
+  | "author"
+  | "commentId"
+  | "createAt"
+  | "content"
+  | "parentComment";
+
+const PostInformation = ({ item }: { item: MangementPostResponseDTO }) => {
   const router = useRouter();
+  const { id } = useParams();
   const [showAll, setShowAll] = useState(false);
-  const handleNavigate = () => {
-    router.push(`/user/${item.id}`);
-  };
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterOption, setFilterOption] = useState("");
-
   const [sortConfig, setSortConfig] = useState<{
     key: SortableKeys;
     direction: "ascending" | "descending";
@@ -75,43 +56,57 @@ const PostInformation = ({ item }: { item: Post }) => {
     key: "commentId",
     direction: "ascending",
   });
-  type SortableKeys = "author" | "commentId" | "createdDate" | "content";
+  // const [item, setItem] = useState<MangementPostResponseDTO | null>(null);
 
-  const getValueByKey = (item: (typeof posts)[0], key: SortableKeys) => {
+  // useEffect(() => {
+  //   const fetchReportUser = async () => {
+  //     if (!id) return;
+  //     try {
+  //       const data = await getManagementPostById(id.toString());
+  //       setItem(data);
+  //       console.log("render 1");
+  //     } catch (error) {
+  //       console.error("Error fetching post information", error);
+  //     }
+  //   };
+
+  //   fetchReportUser();
+  // }, []);
+
+  const getValueByKey = (
+    comment: MangementPostResponseDTO["comment"][0],
+    key: SortableKeys
+  ) => {
     switch (key) {
       case "author":
-        return item.comment.map((item) => {
-          item.author;
-        });
+        return `${comment.author.firstName} ${comment.author.lastName}`;
       case "commentId":
-        return item.comment.map((item) => {
-          item.commentId;
-        });
-      case "createdDate":
-        return item.comment.map((item) => {
-          item.createAt;
-        });
+        return comment.commentId;
+      case "createAt":
+        return new Date(comment.createAt).getTime();
       case "content":
-        return item.comment.map((item) => {
-          item.content;
-        });
+        return comment.content;
+      case "parentComment":
+        return comment.parentComment || "N/A";
       default:
         return "";
     }
   };
 
-  const sorted = [...posts].sort((a, b) => {
-    const aValue = getValueByKey(a, sortConfig.key);
-    const bValue = getValueByKey(b, sortConfig.key);
+  const sortedComments =
+    item?.comment?.slice().sort((a, b) => {
+      const aValue = getValueByKey(a, sortConfig.key);
+      const bValue = getValueByKey(b, sortConfig.key);
 
-    if (aValue < bValue) {
-      return sortConfig.direction === "ascending" ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return sortConfig.direction === "ascending" ? 1 : -1;
-    }
-    return 0;
-  });
+      if (aValue < bValue) {
+        return sortConfig.direction === "ascending" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === "ascending" ? 1 : -1;
+      }
+      return 0;
+    }) || [];
+
   const requestSort = (key: SortableKeys) => {
     let direction: "ascending" | "descending" = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -120,35 +115,25 @@ const PostInformation = ({ item }: { item: Post }) => {
     setSortConfig({ key, direction });
   };
 
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    return null;
-  }
-
-  const renderRow = (item: Post) => {
-    return item.comment.map((comment) => (
-      <tr
-        key={comment.commentId} // Sử dụng commentId làm key
-        className="text-dark100_light500 my-4 border-t border-gray-300 text-sm"
-      >
-        <td className="px-4 py-2">
-          <Link href={`/user/${item.userId}`}>
-            <h3 className="text-base">{comment.author}</h3>
-            <p className="text-base text-gray-500">#00{item.id}</p>
-          </Link>
-        </td>
-        <td className="hidden px-4 py-2 lg:table-cell">
-          <p className="text-base">{comment.commentId}</p>
-        </td>
-        <td className="hidden px-4 py-2 lg:table-cell">
-          <p className="text-base ">
-            <div className="flex w-full flex-col ">
-              <p>{format(comment.createAt, "PPP")}</p>
+  const renderRow = (comment: any) => {
+    return (
+      <>
+        <tr
+          key={comment.commentId}
+          className="text-dark100_light500 my-4 border-t border-gray-300 text-sm"
+        >
+          <td className="px-4 py-2">
+            <Link href={`/user/${comment.author.id}`}>
+              <h3 className="text-base">{`${comment.author.firstName} ${comment.author.lastName}`}</h3>
+              <p className="text-base text-gray-500">#00{comment.author.id}</p>
+            </Link>
+          </td>
+          <td className="hidden px-4 py-2 lg:table-cell">
+            <p className="text-base">{comment.commentId}</p>
+          </td>
+          <td className="hidden px-4 py-2 lg:table-cell">
+            <div className="flex w-full flex-col">
+              <p>{format(new Date(comment.createAt), "PPP")}</p>
               <p className="pt-1 text-xs text-gray-500">
                 {new Date(comment.createAt).toLocaleTimeString("en-US", {
                   hour: "2-digit",
@@ -157,58 +142,88 @@ const PostInformation = ({ item }: { item: Post }) => {
                 })}
               </p>
             </div>
-          </p>
-        </td>
-        <td className="hidden px-4 py-2 lg:table-cell">
-          <p className="text-base ">{comment.content}</p>
-        </td>
-        <td className="hidden px-4 py-2 lg:table-cell">
-          <p className="text-base ">{comment.parentComment ?? "N/A"}</p>
-        </td>
-      </tr>
-    ));
+          </td>
+          <td className="hidden px-4 py-2 lg:table-cell">
+            <p className="text-base">{comment.content}</p>
+          </td>
+          <td className="hidden px-4 py-2 lg:table-cell">
+            <p className="text-base">{comment.parentComment || "N/A"}</p>
+          </td>
+        </tr>
+      </>
+    );
   };
 
-  return (
-    <div className="flex w-full flex-col py-4 ">
-      <div className="flex w-full gap-24 p-4 pb-0">
-        <div className="flex flex-col self-center ">
-          <LableValue label="Post ID" value={item.id.toString()} />
+  if (!item) {
+    return <p>Loading...</p>;
+  }
 
-          <LableValue label="Content" value={item.content} />
-        </div>
-        <div className="flex flex-col self-center">
+  return (
+    <div className="flex w-full flex-col py-4">
+      <div className="flex w-full flex-col px-4 py-2">
+        <div className="w-full grid grid-cols-2 gap-x-10">
           <LableValue
-            label="Date of birth"
-            value={format(item.createAt, "PPP")}
+            label="Post ID"
+            value={item.userId?.id?.toString() || "N/A"}
           />
-          <LableValue label="Location" value={item.id.toString()} />
-        </div>
-      </div>
-      <div className="flex w-full flex-col px-4">
-        <LableValue label="Hastag" value={item.hashtag.join(", ")} />
-        <LableValue label="Tag" value={item.hashtag.join(", ")} />
-      </div>
-      <div className="flex w-full gap-60 px-4">
-        <div className="flex flex-col self-center ">
-          <LableValue label="Type" value={"status"} />
-        </div>
-        <div className="flex flex-col self-center">
+          <LableValue
+            label="Date of Birth"
+            value={format(new Date(item.createAt), "PPP")}
+          />
+          <LableValue label="Content" value={item.content} />
+          <LableValue
+            label="Location"
+            value={item.userId?.id?.toString() || "N/A"}
+          />
+          <LableValue
+            label="Type"
+            value={item.attachment?.length > 0 ? "Media" : "Status"}
+          />
           <LableValue label="Privacy" value={item.privacy} />
         </div>
       </div>
+
       <div className="flex w-full flex-col px-4">
-        <LableValue label="Like" value={item.like.toString()} />
-        <LableValue label="Share" value={item.share.toString()} />
+        <div className="flex items-center">
+          <LableValue label="Like" />
+          <div className="flex">
+            {item.like.map((like) => (
+              <Link key={like.id} href={`/user/${like.id}`}>
+                <Image
+                  src={like.avatar}
+                  height={20}
+                  width={20}
+                  alt="like user"
+                  className="h-auto w-full object-cover rounded-full"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <LableValue label="Share" />
+        <div className="grid grid-cols-5 gap-4">
+          {item.share.map((share) => (
+            <Image
+              key={share.id}
+              src={share.avatar}
+              height={20}
+              width={20}
+              alt="share user"
+              className="h-auto w-full object-cover rounded-full"
+            />
+          ))}
+        </div>
       </div>
+
       <div className="flex w-full flex-col gap-4 px-4">
         <LableValue label="Attachment" />
         <div className="grid grid-cols-5 gap-4">
           {item.attachment
             .slice(0, showAll ? item.attachment.length : 15)
-            .map((attachment, index) => (
+            .map((attachment) => (
               <Image
-                key={index}
+                key={attachment.id}
                 src={attachment.src}
                 height={165}
                 width={195}
@@ -217,30 +232,27 @@ const PostInformation = ({ item }: { item: Post }) => {
               />
             ))}
         </div>
-        {item.attachment.length > 15 && !showAll && (
+        {item.attachment.length > 15 && (
           <button
             className="mt-4 text-blue-500"
-            onClick={() => setShowAll(true)}
+            onClick={() => setShowAll(!showAll)}
           >
-            <p className="text-primary-100"> Xem thêm</p>
-          </button>
-        )}
-        {showAll && (
-          <button
-            className="mt-4 text-blue-500"
-            onClick={() => setShowAll(false)}
-          >
-            <p className="text-primary-100">Ẩn bớt</p>
+            <p className="text-primary-100">
+              {showAll ? "Ẩn bớt" : "Xem thêm"}
+            </p>
           </button>
         )}
       </div>
-      <LableValue label="Comment" />
-      <Table
-        columns={columns}
-        renderRow={renderRow}
-        data={sorted} // Pass sorted data to the table
-        onSort={(key: string) => requestSort(key as SortableKeys)} // Sorting function
-      />
+
+      <div className="flex w-full flex-col gap-4 px-4">
+        <LableValue label="Comment" />
+        <Table
+          columns={columns}
+          renderRow={renderRow}
+          data={sortedComments}
+          onSort={(key: string) => requestSort(key as SortableKeys)}
+        />
+      </div>
     </div>
   );
 };

@@ -1,78 +1,101 @@
 "use client";
 import { useEffect, useState } from "react";
-import { PostData } from "@/components/shared/data";
 import { format } from "date-fns";
 import Link from "next/link";
 import PaginationUI from "@/components/shared/Pagination";
 import { PaginationProps } from "@/types/pagination";
 import MyButton from "@/components/shared/MyButton";
 import Table from "@/components/shared/Table";
+import { fetchReport } from "@/lib/services/report.service";
+import { ReportResponseDTO } from "@/dtos/ReportDTO";
 
 type UserTable = {
   postedUser: string;
   createdDate: Date; // Kiểu Date để chứa ngày kết thúc
   content: string; // Mảng của kiểu Time chứa thông tin về các thời gian
-  postId: number; // Có thể là trạng thái hoạt động, ví dụ: 1 = Active, 2 = Inactive
-  type: number; // Có thể là trạng thái hoạt động, ví dụ: 1 = Active, 2 = Inactive
+  reportId: number; // Có thể là trạng thái hoạt động, ví dụ: 1 = Active, 2 = Inactive
+  status: number; // Có thể là trạng thái hoạt động, ví dụ: 1 = Active, 2 = Inactive
 };
 
 const columns = [
   {
-    header: "User",
-    accessor: "postedUser",
+    header: "Created User",
+    accessor: "createdById.id",
     className: " text-lg font-md",
   },
   {
-    header: "Reported User",
-    accessor: "postId",
+    header: "User ID",
+    accessor: "reportId",
     className: "hidden md:table-cell text-lg font-md",
   },
   {
-    header: "Reported Date",
-    accessor: "type",
-    className: "hidden lg:table-cell text-lg font-md",
+    header: "Fullname",
+    accessor: "name",
+    className: " text-lg font-md",
   },
+  {
+    header: "Created Date",
+    accessor: "createdDate",
+    className: " text-lg font-md",
+  },
+
   {
     header: "Report Content",
     accessor: "content",
     className: " text-lg font-md",
   },
-  {
-    header: "Type",
-    accessor: "type",
-    className: " text-lg font-md",
-  },
-  { header: "Status", accessor: "type", className: " text-lg font-md" },
+  { header: "Status", accessor: "status", className: " text-lg font-md" },
 ];
 
-const ContentTab = () => {
+const UserTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("");
+  const [isReportUser, setIsReportUser] = useState<ReportResponseDTO[]>([]);
+
+  useEffect(() => {
+    const fetchReportUser = async () => {
+      try {
+        const data = await fetchReport();
+
+        // Lọc những báo cáo có entityType là 'user' (so với chữ thường)
+        const filteredReports = data.filter(
+          (report) => report.entityType.toLowerCase() === "post"
+        );
+
+        setIsReportUser(filteredReports);
+      } catch (error) {
+        console.error("Error fetching report user", error);
+      }
+    };
+
+    fetchReportUser();
+  }, []); // Bỏ `isReportUser` khỏi dependency array
 
   const [sortConfig, setSortConfig] = useState<{
     key: SortableKeys;
     direction: "ascending" | "descending";
   }>({
-    key: "postId",
+    key: "reportId",
     direction: "ascending",
   });
-  type SortableKeys = "postedUser" | "postId" | "createdDate" | "type";
+  type SortableKeys = "name" | "reportId" | "createdDate" | "status";
 
-  const getValueByKey = (item: (typeof PostData)[0], key: SortableKeys) => {
+  const getValueByKey = (item: (typeof isReportUser)[0], key: SortableKeys) => {
     switch (key) {
-      case "postedUser":
-        return item.postedUser;
-      case "postId":
-        return item.postId;
+      case "name":
+        return `${item.createdById.firstName} ${item.createdById.lastName} `;
+      case "reportId":
+        return item.createdById.id;
       case "createdDate":
-        return item.createdDate;
-      case "type":
-        return item.type;
+        return item.createdAt;
+      case "status":
+        return item.status;
       default:
         return "";
     }
   };
-  const sorted = [...PostData].sort((a, b) => {
+
+  const sorted = [...isReportUser].sort((a, b) => {
     const aValue = getValueByKey(a, sortConfig.key);
     const bValue = getValueByKey(b, sortConfig.key);
 
@@ -84,6 +107,7 @@ const ContentTab = () => {
     }
     return 0;
   });
+
   const requestSort = (key: SortableKeys) => {
     let direction: "ascending" | "descending" = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -92,23 +116,25 @@ const ContentTab = () => {
     setSortConfig({ key, direction });
   };
 
-  const filterData = sorted.filter((item) => {
+  const filterData = isReportUser.filter((item) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
-    // Lọc theo searchQuery
+
+    // Lọc theo searchQuery với kiểm tra an toàn
     const matchesSearch =
-      item.postedUser.toLowerCase().includes(lowerCaseQuery) ||
-      item.content.toLowerCase().includes(lowerCaseQuery) ||
-      item.postId.toLowerCase().includes(lowerCaseQuery) ||
-      format(item.createdDate, "dd/MM/yyyy")
-        .toLowerCase()
-        .includes(lowerCaseQuery);
+      item.title?.toLowerCase().includes(lowerCaseQuery) ||
+      false || // Kiểm tra tồn tại của item.title
+      item.content?.toLowerCase().includes(lowerCaseQuery) ||
+      false || // Kiểm tra tồn tại của item.content
+      (item.createdAt &&
+        format(new Date(item.createdAt), "dd/MM/yyyy")
+          .toLowerCase()
+          .includes(lowerCaseQuery)); // Kiểm tra item.createdAt
 
     // Lọc theo giá trị bộ lọc được chọn
     const matchesFilter =
-      (filterOption === "status" && item.type === 0) ||
-      (filterOption === "image" && item.type === 1) ||
-      (filterOption === "video" && item.type === 2) ||
-      (filterOption === "post" && item.type === 3) ||
+      (filterOption === "pending" && item.status === 0) ||
+      (filterOption === "confirm" && item.status === 1) ||
+      (filterOption === "reject" && item.status === 2) ||
       !filterOption; // Không có bộ lọc nào được chọn thì hiển thị tất cả
 
     return matchesSearch && matchesFilter;
@@ -141,26 +167,35 @@ const ContentTab = () => {
     return null;
   }
 
-  const renderRow = (item: UserTable) => (
+  const renderRow = (item: ReportResponseDTO) => (
     <tr
-      key={item.postId}
-      className="dark:text-dark-360 my-4 border-t border-gray-300  text-sm "
+      key={item._id}
+      className="text-dark100_light500  mb-4 mt-3 border-t border-gray-300  text-sm "
     >
-      <td className="px-4 py-2" key={item.postId}>
-        <Link href={`/report/content/${item.postId}`}>
-          <h3 className="text-base">{item.postedUser}</h3>
-          <p className="text-base text-gray-500">#00{item.postId}</p>
+      <td className="px-4 py-2" key={item._id}>
+        <Link href={`/report/content/${item._id}`}>
+          <h3 className="text-base">{`${item.createdById.firstName} ${item.createdById.lastName}`}</h3>
+          <p className="text-base text-gray-500">#00{item.createdById.id}</p>
         </Link>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
-        <p className="text-base ">{item.postedUser}</p>
+
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
+        <p className="text-base ">{item.reportedId.id}</p>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
+
+      <td className="px-4 py-2" key={item._id}>
+        <div>
+          <h3 className="text-base">{`${item.reportedId.firstName} ${item.reportedId.lastName}`}</h3>
+          {/* <p className="text-base text-gray-500">#00{item.reportedId.id}</p> */}
+        </div>
+      </td>
+
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
         <p className="text-base ">
           <div className="flex w-full flex-col ">
-            <p>{format(item.createdDate, "PPP")}</p>
-            <p className="pt-1 text-base text-gray-500">
-              {new Date(item.createdDate).toLocaleTimeString("en-US", {
+            <p>{format(item.createdAt, "PPP")}</p>
+            <p className="pt-1 text-xs text-gray-500">
+              {new Date(item.createdAt).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
@@ -169,73 +204,40 @@ const ContentTab = () => {
           </div>
         </p>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
+
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
         <p className="text-base ">{item.content}</p>
       </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
+
+      <td className="hidden px-4 py-2 lg:table-cell" key={item.status}>
         <p className="text-base text-gray-500">
-          {item.type === 0 ? (
+          {item.status === 0 ? (
             <MyButton
-              title="Image"
-              backgroundColor="bg-light-blue"
-              color="text-blue-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : item.type === 1 ? (
-            <MyButton
-              title="Video"
+              title="Pending"
               backgroundColor="bg-light-yellow"
-              color="text-yellow-500"
+              color="text-yellow-600"
               fontWeight="font-medium"
-              fontSize="text-[14px]"
+              fontSize="text-[12px]"
               height="h-[30px]"
-              width="w-[97px]"
+              width="w-[143px]"
             />
-          ) : item.type === 2 ? (
+          ) : item.status === 1 ? (
             <MyButton
-              title="Status"
+              title="Confirmed"
               backgroundColor="bg-custom-green"
               color="text-green-500"
               fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : (
-            <MyButton
-              title="Post"
-              backgroundColor="bg-light-red"
-              color="text-red-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          )}
-        </p>
-      </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.postId}>
-        <p className="text-base text-gray-500">
-          {item.type === 0 || item.type === 1 ? (
-            <MyButton
-              title="Considered"
-              backgroundColor="bg-custom-green"
-              color="text-green-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
+              fontSize="text-[12px]"
               height="h-[30px]"
               width="w-[143px]"
             />
           ) : (
             <MyButton
-              title="Unconsidered"
+              title="Rejected"
               backgroundColor="bg-light-red"
               color="text-red-500"
               fontWeight="font-medium"
-              fontSize="text-[14px]"
+              fontSize="text-[12px]"
               height="h-[30px]"
               width="w-[143px]"
             />
@@ -244,14 +246,13 @@ const ContentTab = () => {
       </td>
     </tr>
   );
-
   return (
     <div className="w-full">
       <div className="w-full px-4">
         <Table
           columns={columns}
           renderRow={renderRow}
-          data={currentData} // Pass sorted data to the table
+          data={sorted} // Pass sorted data to the table
           onSort={(key: string) => requestSort(key as SortableKeys)} // Sorting function
         />
       </div>
@@ -263,4 +264,4 @@ const ContentTab = () => {
   );
 };
 
-export default ContentTab;
+export default UserTab;
