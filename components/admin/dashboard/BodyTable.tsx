@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Table from "./Table";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -8,87 +8,17 @@ import InProgress from "@/components/cards/InProgress";
 import Chart from "./Chart";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { fetchReport } from "@/lib/services/report.service";
+import Rejected from "@/components/cards/Rejected";
 
 type Report = {
-  id: number;
-  createdUser: string;
-  reportedUser: string;
+  id: string;
+  createdUser: any;
+  reportedUser: any;
   createDate: Date;
+  type: string;
   status: number;
 };
-
-const reports: Report[] = [
-  {
-    id: 1,
-    createdUser: "user123",
-    reportedUser: "user456",
-    createDate: new Date("2024-01-15T08:30:00Z"),
-    status: 0, // 0: pending
-  },
-  {
-    id: 2,
-    createdUser: "user789",
-    reportedUser: "user012",
-    createDate: new Date("2024-02-20T12:45:00Z"),
-    status: 1, // 1: resolved
-  },
-  {
-    id: 3,
-    createdUser: "user345",
-    reportedUser: "user678",
-    createDate: new Date("2024-03-10T14:15:00Z"),
-    status: 0,
-  },
-  {
-    id: 4,
-    createdUser: "user456",
-    reportedUser: "user789",
-    createDate: new Date("2024-04-05T09:00:00Z"),
-    status: 2, // 2: rejected
-  },
-  {
-    id: 5,
-    createdUser: "user012",
-    reportedUser: "user123",
-    createDate: new Date("2024-05-18T16:30:00Z"),
-    status: 0,
-  },
-  {
-    id: 6,
-    createdUser: "user678",
-    reportedUser: "user234",
-    createDate: new Date("2024-06-21T11:20:00Z"),
-    status: 1,
-  },
-  {
-    id: 7,
-    createdUser: "user234",
-    reportedUser: "user345",
-    createDate: new Date("2024-07-15T13:10:00Z"),
-    status: 0,
-  },
-  {
-    id: 8,
-    createdUser: "user890",
-    reportedUser: "user567",
-    createDate: new Date("2024-08-30T17:00:00Z"),
-    status: 1,
-  },
-  {
-    id: 9,
-    createdUser: "user567",
-    reportedUser: "user890",
-    createDate: new Date("2024-09-10T10:50:00Z"),
-    status: 1,
-  },
-  {
-    id: 10,
-    createdUser: "user456",
-    reportedUser: "user123",
-    createDate: new Date("2024-10-12T19:25:00Z"),
-    status: 0,
-  },
-];
 
 const columns = [
   { header: "Created User", accessor: "createdUser" },
@@ -102,26 +32,113 @@ const columns = [
     accessor: "createDate",
     className: "hidden lg:table-cell",
   },
+  { header: "type", accessor: "type" },
   { header: "Status", accessor: "status" },
 ];
 
 const BodyTable = () => {
+  const [reportsData, setReportsData] = useState<any[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUser = async () => {
+      const data = await fetchReport();
+      const formattedData = data.slice(0, 10).map((report: any) => ({
+        id: report._id,
+        createdUser: report.createdById,
+        reportedUser: report.reportedId,
+        createDate: new Date(report.createdAt),
+        type: report.entityType,
+        status: report.status,
+      }));
+      console.log(formattedData);
+
+      if (isMounted) {
+        setReportsData(formattedData);
+        // console.log(data);
+      }
+    };
+    fetchUser();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const renderRow = (item: Report) => (
     <tr
       key={item.id}
       className="text-dark100_light500 my-4 border-t border-gray-300 text-xs  md:text-sm "
     >
-      <td className="break-words p-2 text-base md:px-4">
-        <Link href={`/course/${item.id}`}>
-          <h3>{item.createdUser}</h3>
-          <p className=" text-gray-500">#00{item.id}</p>
+      <td className="break-words p-2 md:px-4">
+        <Link href={`/report/${item.id}`}>
+          <h3>
+            {item?.createdUser &&
+              `${item.createdUser.firstName} ${item.createdUser.lastName}`}
+          </h3>
+          <p className=" text-gray-500">
+            #{item?.createdUser && `${item.createdUser.id}`}
+          </p>
         </Link>
       </td>
-      <td className="hidden px-4 py-2 md:table-cell">{item.reportedUser}</td>
+      <td className="hidden px-4 py-2 md:table-cell">
+        <h3>
+          {item?.reportedUser &&
+            `${item.reportedUser.firstName} ${item.reportedUser.lastName}`}
+        </h3>
+        <p className=" text-gray-500">
+          #{item?.reportedUser && `${item.reportedUser.id}`}
+        </p>
+      </td>
       <td className="hidden px-4 py-2 lg:table-cell">
         {format(item.createDate, "dd/MM/yyyy")}
       </td>
-      <td className="px-4 py-2 ">{item.status ? <Done /> : <InProgress />}</td>
+      <td className="px-4 py-2 ">
+        {(() => {
+          switch (item.type) {
+            case "comment":
+              return (
+                <div className="flex w-24 items-center justify-center rounded-lg bg-yellow-200 py-[6px]">
+                  <span className="  text-yellow-800">Comment</span>
+                </div>
+              );
+            case "user":
+              return (
+                <div className="flex w-24 items-center justify-center rounded-lg bg-green-200 py-[6px]">
+                  <span className="text-green-800">User</span>
+                </div>
+              );
+            case "post":
+              return (
+                <div className="flex w-24 items-center justify-center rounded-lg bg-pink-200 py-[6px]">
+                  <span className="text-pink-800">Post</span>
+                </div>
+              );
+            case "message":
+              return (
+                <div className="flex w-24 items-center justify-center rounded-lg bg-purple-200 py-[6px]">
+                  <span className="text-purple-800">Message</span>
+                </div>
+              );
+            default:
+              return (
+                <div className="flex w-24 items-center justify-center rounded-lg bg-gray-400 py-[6px]">
+                  <span className="text-gray-800">Unknown</span>
+                </div>
+              );
+          }
+        })()}
+      </td>
+      <td className="px-4 py-2">
+        {item.status === 0 ? (
+          <InProgress />
+        ) : item.status === 1 ? (
+          <Done />
+        ) : item.status === 2 ? (
+          <Rejected />
+        ) : (
+          "Unknown"
+        )}
+      </td>
     </tr>
   );
 
@@ -140,7 +157,7 @@ const BodyTable = () => {
     direction: "ascending",
   });
 
-  const getValueByKey = (item: (typeof reports)[0], key: SortableKeys) => {
+  const getValueByKey = (item: (typeof reportsData)[0], key: SortableKeys) => {
     switch (key) {
       case "createdUser":
         return item.createdUser;
@@ -155,7 +172,7 @@ const BodyTable = () => {
     }
   };
 
-  const sorted = [...reports].sort((a, b) => {
+  const sorted = [...reportsData].sort((a, b) => {
     const aValue = getValueByKey(a, sortConfig.key);
     const bValue = getValueByKey(b, sortConfig.key);
 
@@ -199,7 +216,7 @@ const BodyTable = () => {
       </div>
 
       <div className=" w-1/3 p-4 py-0">
-        <Chart />
+        <Chart reports={reportsData} />
       </div>
     </div>
   );

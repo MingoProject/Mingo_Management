@@ -27,10 +27,10 @@ export interface ReportResponseDTO {
   title?: string;
   content: string;
   createdById: UserInfor;
-  reportedId: UserInfor; // Thêm reportedId vào đây
+  reportedId: UserInfor;
   reportedEntityId: string;
   entityType: string;
-  status: number; // Trạng thái báo cáo (e.g., "pending", "resolved", etc.)
+  status: number;
   createdAt: Date;
   attachments?: string[]; // Các file đính kèm (nếu có)
   proofs?: string[]; // Các bằng chứng (nếu có)

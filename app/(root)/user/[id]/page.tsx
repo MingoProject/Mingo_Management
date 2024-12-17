@@ -13,6 +13,7 @@ import fetchDetailedPosts from "@/hooks/usePosts";
 import {
   getMyBffs,
   getMyBlocks,
+  getMyFollowers,
   getMyFollowings,
   getMyFriends,
   getMyImages,
@@ -58,6 +59,28 @@ const Page = ({ params }: { params: Params }) => {
       }));
       if (isMounted) {
         setFriendsData(formattedData);
+      }
+    };
+    fetchUser();
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUser = async () => {
+      const data = await getMyFollowers(id);
+      const formattedData = data.map((user: any) => ({
+        id: user._id,
+        fullname: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        phone: user.phoneNumber,
+        status: user.status,
+        enrolled: new Date(user.createAt),
+        birthday: new Date(user.birthDay),
+      }));
+      if (isMounted) {
+        setFollowersData(formattedData);
       }
     };
     fetchUser();
@@ -247,6 +270,7 @@ const Page = ({ params }: { params: Params }) => {
           bestfriendsData={bestfriendsData}
           blocksData={blocksData}
           followingsData={followingsData}
+          followersData={followersData}
         />
         <TilteIcon title="Activities" />
         <ActivitiesList savedPosts={savedPosts} likedPosts={likedPosts} />

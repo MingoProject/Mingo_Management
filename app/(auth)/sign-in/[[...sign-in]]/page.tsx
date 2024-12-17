@@ -66,6 +66,7 @@ const SignIn = () => {
         if (userRoles.includes("admin")) {
           localStorage.setItem("token", user.token);
           const decodedToken = JSON.parse(atob(user.token.split(".")[1]));
+          localStorage.setItem("loginTime", String(Date.now()));
           const userId = decodedToken?.id;
           localStorage.setItem("userId", userId);
           router.push("/");

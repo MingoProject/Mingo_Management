@@ -197,3 +197,31 @@ export async function getManagementPostById(
     throw error;
   }
 }
+
+export async function countPosts() {
+  try {
+    const response = await fetch(`${BASE_URL}/post/count`);
+    if (!response.ok) {
+      throw new Error("Error couting posts");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to count posts:", error);
+    throw error;
+  }
+}
+
+export async function countPostsByAttendDate() {
+  try {
+    const response = await fetch(`${BASE_URL}/post/count-by-created-date`);
+    if (!response.ok) {
+      throw new Error("Error couting posts");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to count posts:", error);
+    throw error;
+  }
+}
