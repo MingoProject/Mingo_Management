@@ -5,7 +5,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import Table from "@/components/shared/Table";
 
-type ActivityType = "save" | "like" | "reported";
+type ActivityType = "save" | "like";
 
 const columns = [
   {
@@ -28,12 +28,6 @@ const columns = [
     accessor: "content",
     className: "hidden lg:table-cell text-lg font-md",
   },
-  // {
-  //   header: "Like At",
-  //   accessor: "createdDate",
-  //   className: "hidden lg:table-cell text-lg font-md",
-  // },
-
   { header: "Type", accessor: "type", className: " text-lg font-md" },
 ];
 
@@ -49,8 +43,8 @@ const ActivitiesList = ({ savedPosts, likedPosts }: any) => {
         return savedPosts;
       case "like":
         return likedPosts;
-      case "reported":
-        return likedPosts; // Sử dụng dữ liệu "likedPosts" cho "reported"
+      // case "reported":
+      //   return likedPosts; // Sử dụng dữ liệu "likedPosts" cho "reported"
       default:
         return savedPosts;
     }
@@ -157,66 +151,6 @@ const ActivitiesList = ({ savedPosts, likedPosts }: any) => {
           {item.media.length > 0 ? "Media" : "Status"}
         </button>
       </td>
-
-      {/* <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm ">
-          <div className="flex w-full flex-col ">
-            <p>{format(item.enrolled, "PPP")}</p>
-            <p className="pt-1 text-xs text-gray-500">
-              {new Date(item.enrolled).toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
-            </p>
-          </div>
-        </p>
-      </td>
-      <td className="hidden px-4 py-2 lg:table-cell" key={item.id}>
-        <p className="text-sm text-gray-500">
-          {item.status === 0 ? (
-            <MyButton
-              title="Image"
-              backgroundColor="bg-light-blue"
-              color="text-blue-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : item.status === 1 ? (
-            <MyButton
-              title="Video"
-              backgroundColor="bg-light-yellow"
-              color="text-yellow-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : item.status === 2 ? (
-            <MyButton
-              title="Status"
-              backgroundColor="bg-custom-green"
-              color="text-green-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          ) : (
-            <MyButton
-              title="Post"
-              backgroundColor="bg-light-red"
-              color="text-red-500"
-              fontWeight="font-medium"
-              fontSize="text-[14px]"
-              height="h-[30px]"
-              width="w-[97px]"
-            />
-          )}
-        </p>
-      </td> */}
     </tr>
   );
 
@@ -235,12 +169,6 @@ const ActivitiesList = ({ savedPosts, likedPosts }: any) => {
           onClick={() => setActiveTab("like")}
         >
           Liked
-        </button>
-        <button
-          className={`flex items-center gap-1 ${activeTab === "reported" ? "text-primary-100 opacity-100" : "opacity-40"}`}
-          onClick={() => setActiveTab("reported")}
-        >
-          Reported
         </button>
       </div>
 

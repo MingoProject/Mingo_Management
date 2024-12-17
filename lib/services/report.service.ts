@@ -39,3 +39,31 @@ export async function UpdateStatusReport(param: any) {
     throw error; // Ném lỗi ra ngoài để dễ dàng debug ở nơi gọi hàm
   }
 }
+
+export async function countReports() {
+  try {
+    const response = await fetch(`${BASE_URL}/report/count`);
+    if (!response.ok) {
+      throw new Error("Error couting reports");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to count reports:", error);
+    throw error;
+  }
+}
+
+export async function countReportsByCreatedDate() {
+  try {
+    const response = await fetch(`${BASE_URL}/report/count-by-created-date`);
+    if (!response.ok) {
+      throw new Error("Error couting reports");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to count reports:", error);
+    throw error;
+  }
+}

@@ -18,7 +18,7 @@ type User = {
   birthday: Date;
 };
 
-type FriendType = "all" | "bestFriend" | "block" | "following";
+type FriendType = "all" | "bestFriend" | "block" | "following" | "follower";
 
 const columns = [
   {
@@ -55,6 +55,7 @@ const FriendList = ({
   bestfriendsData,
   blocksData,
   followingsData,
+  followersData,
 }: any) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("");
@@ -95,6 +96,8 @@ const FriendList = ({
         return blocksData;
       case "following":
         return followingsData;
+      case "follower":
+        return followersData;
       default:
         return friendsData;
     }
@@ -222,6 +225,12 @@ const FriendList = ({
           onClick={() => setActiveTab("following")}
         >
           Following
+        </button>
+        <button
+          className={`flex items-center gap-1 ${activeTab === "follower" ? "text-primary-100 opacity-100" : "opacity-40"}`}
+          onClick={() => setActiveTab("follower")}
+        >
+          Follower
         </button>
         <button
           className={`flex items-center gap-1 ${activeTab === "block" ? "text-primary-100 opacity-100" : "opacity-40"}`}

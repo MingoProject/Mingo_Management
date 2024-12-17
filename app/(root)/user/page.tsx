@@ -52,7 +52,7 @@ const Page = () => {
         fullname: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber,
-        status: user.status ? "Active" : "Inactive",
+        status: user.status,
         enrolled: new Date(user.createAt),
       }));
       if (isMounted) {
