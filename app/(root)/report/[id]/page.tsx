@@ -7,7 +7,11 @@ import { faAddressCard } from "@fortawesome/free-solid-svg-icons";
 import PostedUser from "@/components/admin/content/PostedUser";
 import UserReportInformation from "@/components/admin/report/UserReportInformation";
 import { ReportResponseDTO } from "@/dtos/ReportDTO";
-import { fetchReport, UpdateStatusReport } from "@/lib/services/report.service";
+import {
+  fetchReport,
+  UpdateStatusReport,
+  UpdateUserReportCount,
+} from "@/lib/services/report.service";
 import { createNotification } from "@/lib/services/notification.service";
 import { useParams } from "next/navigation";
 
@@ -44,50 +48,70 @@ const Page = () => {
       </div>
     );
   }
-
   const handleConfirm = async () => {
     try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+
+      if (!token || !userId) {
+        alert("Không tìm thấy thông tin xác thực. Vui lòng đăng nhập lại!");
+        return;
+      }
+
       const data = {
         reportId: id,
         status: 1,
       };
 
       const param = {
-        senderId: "6728699364c0871fd44f1c94",
+        senderId: userId,
         receiverId: reportDetail.reportedId.id,
         type: "report_post",
-        postId: id[0],
+        postId: id.toString(),
       };
 
-      const rs = await UpdateStatusReport(data);
-
-      if (rs) {
-        // Giả sử API trả về một thuộc tính `success` khi thành công
-
-        alert("Cập nhật trạng thái thành công!");
-      } else {
+      // Gọi API UpdateStatusReport
+      const updateStatusResult = await UpdateStatusReport(data, token);
+      if (!updateStatusResult) {
         alert("Cập nhật trạng thái thất bại. Vui lòng thử lại!");
+        return;
       }
 
-      console.log(rs);
+      // Gọi API createNotification
+      const notificationResult = await createNotification(param, token);
+      if (!notificationResult) {
+        alert("Không thể gửi thông báo. Vui lòng thử lại!");
+        return;
+      }
+
+      // Gọi API UpdateUserReportCount
+      const updateCountResult = await UpdateUserReportCount(
+        reportDetail.reportedId.id,
+        token
+      );
+      if (updateCountResult) {
+        alert("Cập nhật trạng thái và thông tin thành công!");
+      } else {
+        alert("Cập nhật số lượng báo cáo thất bại. Vui lòng thử lại!");
+      }
     } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái:", error);
+      console.error("Lỗi khi thực hiện xác nhận:", error);
       alert("Có lỗi xảy ra. Vui lòng thử lại sau!");
     }
   };
 
   const handleReject = async () => {
     try {
+      const token = localStorage.getItem("token");
       const data = {
         reportId: id,
         status: 2, // Trạng thái từ chối
       };
 
-      const rs = await UpdateStatusReport(data);
+      const rs = await UpdateStatusReport(data, token);
 
       // Kiểm tra kết quả từ API
       if (rs) {
-        // Giả sử API trả về `success: true` nếu thành công
         alert("Từ chối báo cáo thành công!");
       } else {
         alert("Không thể từ chối báo cáo. Vui lòng thử lại!");
@@ -100,14 +124,34 @@ const Page = () => {
     }
   };
 
+  console.log(reportDetail, "reportDetail");
+
   return (
     <div className="text-dark100_light500 background-light700_dark400 flex size-full flex-col p-4">
-      <HeaderWithButton
-        title="Report User Detail"
-        type={2}
-        onConfirm={handleConfirm}
-        onReject={handleReject}
-      />
+      {reportDetail.status === 0 &&
+      reportDetail.reportedId.countReport === 5 ? (
+        <HeaderWithButton
+          title="Report User Detail"
+          type={3}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      ) : reportDetail.status === 0 ? (
+        <HeaderWithButton
+          title="Report User Detail"
+          type={2}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      ) : (
+        <HeaderWithButton
+          title="Report User Detail"
+          type={0}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      )}
+
       <div className="w-full rounded-[10px] p-4 shadow-sm">
         <TilteIcon title="Created User" icon={faAddressCard} />
         <PostedUser item={reportDetail.createdById} />

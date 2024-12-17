@@ -21,6 +21,7 @@ import {
   MenubarSeparator,
 } from "@radix-ui/react-menubar";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import HeaderWithButton from "@/components/header/HeaderWithButton";
 
 const columns = [
   {
@@ -241,7 +242,7 @@ const Page = () => {
   );
   return (
     <div className="background-light700_dark400 flex size-full flex-col p-4">
-      <HeaderNoButton />
+      <HeaderWithButton title="Post Detail" type={0} />
 
       <div className="text-dark100_light500 mt-0 flex w-full flex-col items-center justify-between gap-4 rounded-md md:flex-row">
         <TableSearch onSearch={setSearchQuery} />
@@ -249,7 +250,7 @@ const Page = () => {
           <Menubar className="relative border-none bg-transparent p-4 shadow-none">
             <MenubarMenu>
               <MenubarTrigger className="flex items-center gap-2">
-                <button className=" text-dark100_light500 flex h-[35px] items-center gap-1 rounded-lg border-2 px-4 py-2 text-sm shadow-md transition-opacity duration-300 hover:opacity-75">
+                <div className=" text-dark100_light500 flex h-[35px] items-center gap-1 rounded-lg border-2 px-4 py-2 text-sm shadow-md transition-opacity duration-300 hover:opacity-75">
                   <Icon
                     icon="tabler:adjustments-horizontal"
                     width={14}
@@ -257,7 +258,7 @@ const Page = () => {
                     className="text-dark100_light500"
                   />
                   <p className="text-dark100_light500">Filter</p>
-                </button>
+                </div>
               </MenubarTrigger>
               <MenubarContent className="text-dark100_light500 absolute -right-12 top-full z-50 mt-3 h-auto w-40 bg-gray-50 font-sans text-sm shadow-md">
                 <MenubarItem

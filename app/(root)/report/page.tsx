@@ -53,7 +53,7 @@ const Page = () => {
           <Menubar className="relative border-none bg-transparent py-4 shadow-none">
             <MenubarMenu>
               <MenubarTrigger className="flex items-center gap-2">
-                <button className=" flex h-[35px] items-center gap-1 rounded-lg border-2 px-4 py-2 text-sm shadow-md transition-opacity duration-300 hover:opacity-75">
+                <div className=" flex h-[35px] items-center gap-1 rounded-lg border-2 px-4 py-2 text-sm shadow-md transition-opacity duration-300 hover:opacity-75">
                   <Icon
                     icon="tabler:adjustments-horizontal"
                     width={14}
@@ -61,7 +61,7 @@ const Page = () => {
                     className="text-gray-800 dark:text-white"
                   />
                   Filter
-                </button>
+                </div>
               </MenubarTrigger>
               <MenubarContent className="text-dark100_light500 absolute -right-12 top-full z-50 mt-3 h-auto w-40 bg-gray-50 font-sans text-sm shadow-md">
                 <MenubarItem
@@ -95,7 +95,7 @@ const Page = () => {
         </div>
       </div>
       <div className="flex w-full flex-col gap-8 pt-0 text-lg font-bold dark:text-white lg:flex-row">
-        <button
+        <div
           className={`flex items-center gap-1  ${
             activeTab === "user"
               ? "border-b border-primary-100 text-primary-100 opacity-100"
@@ -104,8 +104,8 @@ const Page = () => {
           onClick={() => setActiveTab("user")}
         >
           User
-        </button>
-        <button
+        </div>
+        <div
           className={`flex items-center gap-1 ${
             activeTab === "content"
               ? "border-b border-primary-100 text-primary-100 opacity-100"
@@ -114,8 +114,8 @@ const Page = () => {
           onClick={() => setActiveTab("content")}
         >
           Content
-        </button>
-        <button
+        </div>
+        <div
           className={`flex items-center gap-1 ${
             activeTab === "comment"
               ? "border-b border-primary-100 text-primary-100 opacity-100"
@@ -124,7 +124,7 @@ const Page = () => {
           onClick={() => setActiveTab("comment")}
         >
           Comment
-        </button>
+        </div>
       </div>
       <div className="pt-2">{renderContent()}</div>
     </div>

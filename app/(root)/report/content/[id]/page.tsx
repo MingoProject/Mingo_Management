@@ -10,6 +10,7 @@ import { ReportResponseDTO } from "@/dtos/ReportDTO";
 import { fetchReport, UpdateStatusReport } from "@/lib/services/report.service";
 import { useParams } from "next/navigation";
 import { createNotification } from "@/lib/services/notification.service";
+import { deletePost } from "@/lib/services/post.service";
 
 const Page = () => {
   const { id } = useParams();
@@ -46,21 +47,16 @@ const Page = () => {
   }
 
   const handleConfirm = async () => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
     try {
       const data = {
         reportId: id,
         status: 1,
       };
 
-      const param = {
-        senderId: "6728699364c0871fd44f1c94",
-        receiverId: reportDetail.reportedId.id,
-        type: "report_post",
-        postId: id[0],
-      };
-
-      const rs = await UpdateStatusReport(data);
-
+      const rs = await UpdateStatusReport(data, token);
+      await deletePost(reportDetail.reportedEntityId, token);
       if (rs) {
         // Giả sử API trả về một thuộc tính `success` khi thành công
 
@@ -77,13 +73,14 @@ const Page = () => {
   };
 
   const handleReject = async () => {
+    const token = localStorage.getItem("token");
     try {
       const data = {
         reportId: id,
         status: 2, // Trạng thái từ chối
       };
 
-      const rs = await UpdateStatusReport(data);
+      const rs = await UpdateStatusReport(data, token);
 
       // Kiểm tra kết quả từ API
       if (rs) {
@@ -102,12 +99,22 @@ const Page = () => {
 
   return (
     <div className="text-dark100_light500 background-light700_dark400 flex size-full flex-col p-4">
-      <HeaderWithButton
-        title="Report Content Detail"
-        type={2}
-        onConfirm={handleConfirm}
-        onReject={handleReject}
-      />
+      {reportDetail.status === 0 ? (
+        <HeaderWithButton
+          title="Report Content Detail"
+          type={2}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      ) : (
+        <HeaderWithButton
+          title="Report Content Detail"
+          type={0}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      )}
+
       <div className="w-full rounded-[10px] p-4 shadow-sm">
         <TilteIcon title="Created User" icon={faAddressCard} />
         <PostedUser item={reportDetail.createdById} />

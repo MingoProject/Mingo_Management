@@ -2,45 +2,19 @@ import { CreateNotificationDTO } from "../../dtos/NotificationDTO";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-// export async function createNotification(
-//   params: CreateNotificationDTO,
-//   token: string | null
-// ) {
-//   try {
-//     console.log(`${BASE_URL}/notification/create-notification`, params, token);
-//     const response = await fetch(
-//       `${BASE_URL}/notification/create-notification`,
-//       {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `${token}`,
-//         },
-//         body: JSON.stringify(params),
-//       }
-//     );
-
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! Status: ${response.status}`);
-//     }
-
-//     const data = await response.json();
-//     return data;
-//   } catch (error: any) {
-//     console.error("Upload error:", error.message);
-//     throw error;
-//   }
-// }
-
-export async function createNotification(params: CreateNotificationDTO) {
+export async function createNotification(
+  params: CreateNotificationDTO,
+  token: string | null
+) {
   try {
-    console.log(`${BASE_URL}/notification/create-notification`, params);
+    console.log(`${BASE_URL}/notification/create-notification`, params, token);
     const response = await fetch(
       `${BASE_URL}/notification/create-notification`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `${token}`,
         },
         body: JSON.stringify(params),
       }

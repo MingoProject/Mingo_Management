@@ -73,7 +73,7 @@ const HeaderWithButton = ({
             fontWeight="font-medium"
           />
         </div>
-      ) : (
+      ) : type === 2 ? (
         <div className="flex gap-4">
           <MyButton
             title="Reject"
@@ -93,6 +93,72 @@ const HeaderWithButton = ({
             backgroundColor="bg-green-500"
             color="text-white"
             icon={faCheck}
+            iconPosition="left"
+            width="w-[90px]"
+            height="h-[35px]"
+            fontSize="text-[14px]"
+            fontWeight="font-medium"
+          />
+          <MyButton
+            title="Cancel"
+            onClick={handleBack}
+            backgroundColor="bg-gray-200"
+            icon={faXmark}
+            iconPosition="left"
+            color="text-light-500"
+            width="w-[90px]"
+            height="h-[35px]"
+            fontSize="text-[14px]"
+            fontWeight="font-medium"
+          />
+        </div>
+      ) : type === 3 ? (
+        <div className="flex gap-4">
+          <MyButton
+            title="Reject"
+            onClick={onReject}
+            backgroundColor="bg-red-500"
+            color="text-white"
+            icon={faTrashCan}
+            iconPosition="left"
+            width="w-[90px]"
+            height="h-[35px]"
+            fontSize="text-[14px]"
+            fontWeight="font-medium"
+          />
+          <MyButton
+            title="Delete"
+            onClick={onReject}
+            backgroundColor="bg-red-500"
+            color="text-white"
+            icon={faTrashCan}
+            iconPosition="left"
+            width="w-[90px]"
+            height="h-[35px]"
+            fontSize="text-[14px]"
+            fontWeight="font-medium"
+          />
+          <MyButton
+            title="Cancel"
+            onClick={handleBack}
+            backgroundColor="bg-gray-200"
+            icon={faXmark}
+            iconPosition="left"
+            color="text-light-500"
+            width="w-[90px]"
+            height="h-[35px]"
+            fontSize="text-[14px]"
+            fontWeight="font-medium"
+          />
+        </div>
+      ) : (
+        <div className="flex gap-4">
+          <MyButton
+            title="Delete"
+            onClick={onReject}
+            backgroundColor="bg-red-500"
+            color="text-white"
+            icon={faTrashCan}
             iconPosition="left"
             width="w-[90px]"
             height="h-[35px]"

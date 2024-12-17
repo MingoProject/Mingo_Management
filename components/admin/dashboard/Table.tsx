@@ -24,7 +24,7 @@ const Table = ({
             >
               <div className="flex items-center">
                 <span>{col.header}</span>
-                <button
+                <div
                   className=" inline-flex items-center px-2"
                   onClick={() => onSort(col.accessor)} // Pass column key for sorting
                 >
@@ -34,7 +34,7 @@ const Table = ({
                     width={18}
                     height={18}
                   />
-                </button>
+                </div>
               </div>
             </th>
           ))}

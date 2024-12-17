@@ -56,22 +56,6 @@ const PostInformation = ({ item }: { item: MangementPostResponseDTO }) => {
     key: "commentId",
     direction: "ascending",
   });
-  // const [item, setItem] = useState<MangementPostResponseDTO | null>(null);
-
-  // useEffect(() => {
-  //   const fetchReportUser = async () => {
-  //     if (!id) return;
-  //     try {
-  //       const data = await getManagementPostById(id.toString());
-  //       setItem(data);
-  //       console.log("render 1");
-  //     } catch (error) {
-  //       console.error("Error fetching post information", error);
-  //     }
-  //   };
-
-  //   fetchReportUser();
-  // }, []);
 
   const getValueByKey = (
     comment: MangementPostResponseDTO["comment"][0],
@@ -186,16 +170,18 @@ const PostInformation = ({ item }: { item: MangementPostResponseDTO }) => {
       <div className="flex w-full flex-col px-4">
         <div className="flex items-center">
           <LableValue label="Like" />
-          <div className="flex">
+          <div className="flex gap-2">
             {item.like.map((like) => (
               <Link key={like.id} href={`/user/${like.id}`}>
-                <Image
-                  src={like.avatar}
-                  height={20}
-                  width={20}
-                  alt="like user"
-                  className="h-auto w-full object-cover rounded-full"
-                />
+                <div className="w-7 h-7">
+                  <Image
+                    src={like.avatar || "/assets/images/default-user.png"}
+                    height={20}
+                    width={20}
+                    alt="like user"
+                    className="h-full w-full object-cover rounded-full"
+                  />
+                </div>
               </Link>
             ))}
           </div>
@@ -233,18 +219,18 @@ const PostInformation = ({ item }: { item: MangementPostResponseDTO }) => {
             ))}
         </div>
         {item.attachment.length > 15 && (
-          <button
+          <div
             className="mt-4 text-blue-500"
             onClick={() => setShowAll(!showAll)}
           >
             <p className="text-primary-100">
               {showAll ? "Ẩn bớt" : "Xem thêm"}
             </p>
-          </button>
+          </div>
         )}
       </div>
 
-      <div className="flex w-full flex-col gap-4 px-4">
+      <div className="flex w-full flex-col  px-4 mt-4">
         <LableValue label="Comment" />
         <Table
           columns={columns}

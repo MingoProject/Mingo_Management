@@ -9,6 +9,7 @@ import UserReportInformation from "@/components/admin/report/UserReportInformati
 import { ReportResponseDTO } from "@/dtos/ReportDTO";
 import { fetchReport, UpdateStatusReport } from "@/lib/services/report.service";
 import { useParams } from "next/navigation";
+import { deleteComment } from "@/lib/services/comment.service";
 
 const Page = () => {
   const { id } = useParams();
@@ -46,12 +47,17 @@ const Page = () => {
 
   const handleConfirm = async () => {
     try {
+      const token = localStorage.getItem("token");
       const data = {
         reportId: id,
         status: 1,
       };
-      const rs = await UpdateStatusReport(data);
-
+      const rs = await UpdateStatusReport(data, token);
+      await deleteComment(
+        reportDetail.reportedEntityId,
+        reportDetail.parentReportEntityId || "",
+        token || ""
+      );
       if (rs) {
         // Giả sử API trả về một thuộc tính `success` khi thành công
         alert("Cập nhật trạng thái thành công!");
@@ -72,8 +78,8 @@ const Page = () => {
         reportId: id,
         status: 2, // Trạng thái từ chối
       };
-
-      const rs = await UpdateStatusReport(data);
+      const token = localStorage.getItem("token");
+      const rs = await UpdateStatusReport(data, token);
 
       // Kiểm tra kết quả từ API
       if (rs) {
@@ -92,12 +98,21 @@ const Page = () => {
 
   return (
     <div className="text-dark100_light500 background-light700_dark400 flex size-full flex-col p-4">
-      <HeaderWithButton
-        title="Report Comment Detail"
-        type={2}
-        onConfirm={handleConfirm}
-        onReject={handleReject}
-      />
+      {reportDetail.status === 0 ? (
+        <HeaderWithButton
+          title="Report Content Detail"
+          type={2}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      ) : (
+        <HeaderWithButton
+          title="Report Content Detail"
+          type={0}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      )}
       <div className="w-full rounded-[10px] p-4 shadow-sm">
         <TilteIcon title="Created User" icon={faAddressCard} />
         <PostedUser item={reportDetail.createdById} />
