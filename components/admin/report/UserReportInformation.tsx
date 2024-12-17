@@ -48,23 +48,20 @@ const UserReportInformation = ({ item }: { item: ReportResponseDTO }) => {
         {item.attachments?.length ? (
           item.attachments?.length > 15 &&
           !showAll && (
-            <button
+            <div
               className="mt-4 text-blue-500"
               onClick={() => setShowAll(true)}
             >
               Show All
-            </button>
+            </div>
           )
         ) : (
           <div>Không có đính kèm</div>
         )}
         {showAll && (
-          <button
-            className="mt-4 text-blue-500"
-            onClick={() => setShowAll(false)}
-          >
+          <div className="mt-4 text-blue-500" onClick={() => setShowAll(false)}>
             <p className="text-primary-100">Ẩn bớt</p>
-          </button>
+          </div>
         )}
       </div>
     </div>

@@ -67,20 +67,14 @@ const ReportInformation = ({ item }: { item: Post }) => {
             })}
         </div>
         {item.attachment?.length > 15 && !showAll && (
-          <button
-            className="mt-4 text-blue-500"
-            onClick={() => setShowAll(true)}
-          >
+          <div className="mt-4 text-blue-500" onClick={() => setShowAll(true)}>
             Show All
-          </button>
+          </div>
         )}
         {showAll && (
-          <button
-            className="mt-4 text-blue-500"
-            onClick={() => setShowAll(false)}
-          >
+          <div className="mt-4 text-blue-500" onClick={() => setShowAll(false)}>
             <p className="text-primary-100">Ẩn bớt</p>
-          </button>
+          </div>
         )}
       </div>
     </div>

@@ -49,7 +49,7 @@ const Page = () => {
           <Menubar className="relative border-none bg-transparent p-4 shadow-none">
             <MenubarMenu>
               <MenubarTrigger className="flex items-center gap-2">
-                <button className=" text-dark100_light500 flex h-[35px] items-center gap-1 rounded-lg border-2 px-4 py-2 text-sm shadow-md transition-opacity duration-300 hover:opacity-75">
+                <div className=" text-dark100_light500 flex h-[35px] items-center gap-1 rounded-lg border-2 px-4 py-2 text-sm shadow-md transition-opacity duration-300 hover:opacity-75">
                   <Icon
                     icon="tabler:adjustments-horizontal"
                     width={14}
@@ -57,7 +57,7 @@ const Page = () => {
                     className="text-dark100_light500"
                   />
                   <p className="text-dark100_light500">Filter</p>
-                </button>
+                </div>
               </MenubarTrigger>
               <MenubarContent className="text-dark100_light500 absolute -right-12 top-full z-50 mt-3 h-auto w-40 bg-gray-50 font-sans text-sm shadow-md">
                 <MenubarItem
@@ -91,7 +91,7 @@ const Page = () => {
         </div>
       </div>
       <div className="flex w-full flex-col gap-8  text-lg  font-bold dark:text-white lg:flex-row">
-        <button
+        <div
           className={`flex items-center gap-1 ${
             activeTab === "post"
               ? "border-b border-primary-100 text-primary-100 opacity-100"
@@ -100,8 +100,8 @@ const Page = () => {
           onClick={() => setActiveTab("post")}
         >
           Post
-        </button>
-        <button
+        </div>
+        <div
           className={`flex items-center gap-1 ${
             activeTab === "message"
               ? "border-b border-primary-100 text-primary-100 opacity-100"
@@ -110,7 +110,7 @@ const Page = () => {
           onClick={() => setActiveTab("message")}
         >
           Message
-        </button>
+        </div>
       </div>
       <div className="pt-2">{renderContent()}</div>
     </div>

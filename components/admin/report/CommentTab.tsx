@@ -21,30 +21,30 @@ const columns = [
   {
     header: "Created User",
     accessor: "createdById.id",
-    className: " text-lg font-md",
+    className: " text-base font-md",
   },
   {
-    header: "User ID",
+    header: "Reported User",
     accessor: "reportId",
-    className: "hidden md:table-cell text-lg font-md",
+    className: "hidden md:table-cell text-base font-md",
   },
   {
-    header: "Fullname",
+    header: "Post",
     accessor: "name",
-    className: " text-lg font-md",
+    className: " text-base font-md",
   },
   {
     header: "Created Date",
     accessor: "createdDate",
-    className: " text-lg font-md",
+    className: " text-base whitespace-nowrap font-md",
   },
 
   {
     header: "Report Content",
     accessor: "content",
-    className: " text-lg font-md",
+    className: " text-base font-md",
   },
-  { header: "Status", accessor: "status", className: " text-lg font-md" },
+  { header: "Status", accessor: "status", className: " text-base font-md" },
 ];
 
 const UserTab = () => {
@@ -172,24 +172,26 @@ const UserTab = () => {
     >
       <td className="px-4 py-2" key={item._id}>
         <Link href={`/report/comment/${item._id}`}>
-          <h3 className="text-base">{`${item.createdById.firstName} ${item.createdById.lastName}`}</h3>
-          <p className="text-base text-gray-500">#00{item.createdById.id}</p>
+          <h3 className="text-sm">{`${item.createdById.firstName} ${item.createdById.lastName}`}</h3>
+          <p className="text-sm text-gray-500">{item.createdById.id}</p>
+        </Link>
+      </td>
+
+      <td className="px-4 py-2" key={item._id}>
+        <Link href={`/report/comment/${item._id}`}>
+          <h3 className="text-sm">{`${item.reportedId.firstName} ${item.reportedId.lastName}`}</h3>
+          <p className="text-sm text-gray-500">{item.reportedId.id}</p>
+        </Link>
+      </td>
+
+      <td className="px-4 py-2" key={item._id}>
+        <Link href={`/post/${item.parentReportEntityId}`}>
+          <p className="text-sm ">{item.parentReportEntityId}</p>
         </Link>
       </td>
 
       <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
-        <p className="text-base ">{item.reportedId.id}</p>
-      </td>
-
-      <td className="px-4 py-2" key={item._id}>
-        <div>
-          <h3 className="text-base">{`${item.reportedId.firstName} ${item.reportedId.lastName}`}</h3>
-          {/* <p className="text-base text-gray-500">#00{item.reportedId.id}</p> */}
-        </div>
-      </td>
-
-      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
-        <p className="text-base ">
+        <p className="text-sm ">
           <div className="flex w-full flex-col ">
             <p>{format(item.createdAt, "PPP")}</p>
             <p className="pt-1 text-xs text-gray-500">
@@ -204,11 +206,11 @@ const UserTab = () => {
       </td>
 
       <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
-        <p className="text-base ">{item.content}</p>
+        <p className="text-sm ">{item.content}</p>
       </td>
 
       <td className="hidden px-4 py-2 lg:table-cell" key={item.status}>
-        <p className="text-base text-gray-500">
+        <p className="text-sm text-gray-500">
           {item.status === 0 ? (
             <MyButton
               title="Pending"
