@@ -160,21 +160,21 @@ const UserTab = () => {
       key={item._id}
       className="text-dark100_light500  mb-4 mt-3 border-t border-gray-300  text-sm "
     >
-      <td className="px-4 py-2">
+      <td className="px-4 py-2" key={item._id}>
         <Link href={`/report/${item._id}`}>
           <h3 className="text-sm">{`${item.createdById.firstName} ${item.createdById.lastName}`}</h3>
           <p className="text-sm  text-gray-500">{item.createdById.id}</p>
         </Link>
       </td>
 
-      <td className="px-4 py-2">
+      <td className="px-4 py-2" key={item._id}>
         <Link href={`/report/${item._id}`}>
           <h3 className="text-sm">{`${item.reportedId.firstName} ${item.reportedId.lastName}`}</h3>
           <p className="text-sm text-gray-500">{item.reportedId.id}</p>
         </Link>
       </td>
 
-      <td className="hidden px-4 py-2 lg:table-cell">
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
         <div className="flex w-full flex-col ">
           <p>{format(item.createdAt, "PPP")}</p>
           <p className="pt-1 text-xs text-gray-500">
@@ -187,11 +187,11 @@ const UserTab = () => {
         </div>
       </td>
 
-      <td className="hidden px-4 py-2 lg:table-cell">
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
         <p className="text-sm ">{item.content}</p>
       </td>
 
-      <td className="hidden px-4 py-2 lg:table-cell">
+      <td className="hidden px-4 py-2 lg:table-cell" key={item._id}>
         {item.status === 0 ? (
           <MyButton
             title="Pending"
