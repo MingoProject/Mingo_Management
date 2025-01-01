@@ -129,7 +129,7 @@ const Page = () => {
   return (
     <div className="text-dark100_light500 background-light700_dark400 flex size-full flex-col p-4">
       {reportDetail.status === 0 &&
-      reportDetail.reportedId.countReport === 5 ? (
+      reportDetail.reportedId.reportCount === 5 ? (
         <HeaderWithButton
           title="Report User Detail"
           type={3}
